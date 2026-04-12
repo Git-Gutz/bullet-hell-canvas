@@ -226,49 +226,80 @@ footer {
 /* =========================================
    7. MEDIA QUERIES Y OPTIMIZACIÓN MÓVIL
 ========================================= */
+
 /* COMPORTAMIENTO MÓVIL (Por defecto < 992px) */
 .game-column {
     height: auto;
     flex: 0 0 auto;
+    display: flex;
+    align-items: center;
 }
 
 .info-column {
     flex: 1 1 auto;
-    min-height: 0; /* Permite que la tarjeta se encoja sin romper el flexbox */
+    min-height: 0; 
 }
 
-/* Reducción del HUD para que quepa sin Scroll en teléfonos */
 @media (max-width: 991px) {
+    /* 1. Restringir el tamaño del juego para proteger los botones */
+    .arcade-window {
+        max-height: 45dvh; /* El juego NUNCA ocupará más del 45% de la pantalla en vertical */
+        width: auto; /* Se encoge a los lados automáticamente si es necesario */
+        margin: 0 auto; /* Lo mantiene centrado */
+    }
+
+    /* 2. Comprimir la cabecera de la tarjeta */
+    .card-header {
+        padding: 0.3rem !important; 
+    }
+    .card-header h4 {
+        font-size: 1rem !important; 
+    }
+
+    /* 3. Comprimir el cuerpo y los textos */
     .card-body {
-        padding: 0.5rem; /* Menos relleno interno */
+        padding: 0.4rem; 
     }
     
     .instructions-box {
-        display: none !important; /* Ocultamos las instrucciones para ganar espacio */
+        display: none !important; /* Oculto en móvil */
     }
 
-    /* Convertimos la lista vertical en un layout horizontal compacto */
     .hud-stats {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem !important;
+        margin-bottom: 0.2rem !important; /* Casi sin margen abajo */
     }
 
-    .hud-stats h5, .hud-stats h6 { margin-bottom: 4px; width: 48%; font-size: 0.65rem !important; }
+    .hud-stats h5, .hud-stats h6 { margin-bottom: 2px; width: 48%; font-size: 0.65rem !important; }
     .hud-stats p { margin-bottom: 0; width: 30%; font-size: 0.6rem !important; text-align: center; }
+    .hud-stats hr { display: none; } 
     
-    .hud-stats hr { display: none; } /* Quitamos la línea separadora */
-    
-    #ui-lives { font-size: 1.2rem !important; } /* Corazones un poco más pequeños en móvil */
-    
-    .btn-lg { padding: 0.4rem; font-size: 0.7rem !important; } /* Botones más delgados */
+    #ui-lives { font-size: 1.2rem !important; } 
+
+    /* 4. Comprimir los botones al máximo */
+    .d-grid { 
+        gap: 0.25rem !important; /* Reduce el espacio entre los 3 botones */
+    }
+    .btn-lg { 
+        padding: 0.35rem; 
+        font-size: 0.7rem !important; 
+    }
 }
 
 /* COMPORTAMIENTO ESCRITORIO (PC >= 992px) */
 @media (min-width: 992px) {
+    html, body {
+        height: 100vh;
+        overflow: hidden !important; 
+    }
+    .content-wrapper {
+        height: calc(100vh - 120px); 
+        overflow: hidden;
+    }
     .game-column, .info-column {
-        height: 100%; /* En PC, ambas columnas toman el 100% de la altura disponible */
+        height: 100%; 
     }
 }
