@@ -1,50 +1,56 @@
-// Esperamos a que todo el HTML cargue antes de ejecutar el script
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. Instanciar el Juego
-    const game = new Game('gameCanvas');
+    // 1. Definir qué imágenes vamos a usar
+    // IMPORTANTE: Pon la ruta correcta hacia tu imagen.
+    // Ejemplo: '../images/player/nave.png' o './assets/images/player/nave.png'
+    const imageSources = {
+        playerShip: './assets/images/player/playerShip1_blue.png' // <--- CAMBIA ESTO POR TU RUTA
+    };
 
-    // 2. Capturar Elementos de la UI
+    // 2. Elementos de UI
     const btnStart = document.getElementById('btn-start');
     const btnPause = document.getElementById('btn-pause');
     const btnRestart = document.getElementById('btn-restart');
 
-    // 3. Configurar Eventos (Listeners)
+    // Deshabilitar Start mientras carga
+    btnStart.disabled = true;
+    btnStart.textContent = 'CARGANDO ASSETS...';
 
-    // Botón Iniciar Sistema
-    btnStart.addEventListener('click', () => {
-        game.start();
+    // 3. Precargar imágenes y LUEGO inicializar el juego
+    Assets.loadImages(imageSources, () => {
         
-        // Actualizar UI: Apagar botón Start, encender botón Pause
-        btnStart.disabled = true;
-        btnPause.disabled = false;
-        
-        // Opcional: Cambiar texto para dar feedback
-        btnStart.textContent = 'EJECUTANDO...';
-        btnStart.classList.replace('btn-arcade-success', 'btn-secondary');
-    });
+        // ¡Las imágenes ya cargaron! Habilitamos el botón
+        btnStart.disabled = false;
+        btnStart.textContent = 'INICIAR_SISTEMA';
 
-    // Botón Pausa
-    btnPause.addEventListener('click', () => {
-        game.togglePause();
-        
-        // Cambiar el texto y el color del botón según el estado
-        if (game.isPaused) {
-            btnPause.textContent = 'REANUDAR';
-            btnPause.classList.replace('btn-arcade-warning', 'btn-arcade-success');
-        } else {
-            btnPause.textContent = 'PAUSA';
-            btnPause.classList.replace('btn-arcade-success', 'btn-arcade-warning');
-        }
-    });
+        // Instanciamos el juego
+        const game = new Game('gameCanvas');
 
-    // Botón Reiniciar
-    btnRestart.addEventListener('click', () => {
-        // Por ahora solo recargará la página para un "hard reset" rápido.
-        // Más adelante programaremos un reinicio suave de variables.
-        location.reload();
-    });
+        // Dibujar el primer frame para que no se vea negro
+        game.draw();
 
-    // 4. (Opcional) Dibujar un frame inicial para que no se vea negro puro antes de iniciar
-    game.draw();
+        // 4. Configurar Eventos
+        btnStart.addEventListener('click', () => {
+            game.start();
+            btnStart.disabled = true;
+            btnPause.disabled = false;
+            btnStart.textContent = 'EJECUTANDO...';
+            btnStart.classList.replace('btn-arcade-success', 'btn-secondary');
+        });
+
+        btnPause.addEventListener('click', () => {
+            game.togglePause();
+            if (game.isPaused) {
+                btnPause.textContent = 'REANUDAR';
+                btnPause.classList.replace('btn-arcade-warning', 'btn-arcade-success');
+            } else {
+                btnPause.textContent = 'PAUSA';
+                btnPause.classList.replace('btn-arcade-success', 'btn-arcade-warning');
+            }
+        });
+
+        btnRestart.addEventListener('click', () => {
+            location.reload();
+        });
+    });
 });
