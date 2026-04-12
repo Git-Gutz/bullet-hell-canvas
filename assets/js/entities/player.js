@@ -6,46 +6,61 @@ class Player {
         this.x = this.game.width / 2;
         this.y = this.game.height - 100;
         this.speed = 0.15;
-        this.hitboxRadius = 27; 
         this.minY = this.game.height * 0.40;
 
         this.fireTimer = 0;
         this.fireInterval = 200; 
 
+        // iFrames y Daño
         this.isInvulnerable = false;
         this.invulnerableTimer = 0;
         this.invulnerableDuration = 1500;
         this.flashTimer = 0;
         this.flashInterval = 100;
         this.isVisible = true;
+        this.damageType = 'none'; 
 
-        // --- SISTEMA DE LÁSER Y BOTÓN ---
+        // Power-Ups y Animación Escudo
+        this.hasShield = false;
+        this.isMultiShotActive = false;
+        this.multiShotTimer = 0;
+        this.isShieldBreaking = false;
+        this.shieldBreakTimer = 0;
+        this.shieldBreakDuration = 300;
+
+        // Láser
         this.isLaserActive = false;
         this.laserTimer = 0;
         this.laserDuration = 1500;
-        this.laserCooldown = 10000; // 10 segundos
-        this.laserCooldownTimer = 10000; // Inicia cargado
+        this.laserCooldown = 10000; 
+        this.laserCooldownTimer = 10000; 
         this.isLaserReady = true;
 
-        // Propiedades del botón HUD
         this.btnSize = 80;
         this.btnX = this.game.width - 100;
         this.btnY = this.game.height - 100;
     }
 
+    takeDamage(isShieldHit) {
+        this.isInvulnerable = true;
+        this.invulnerableTimer = 0;
+        this.flashTimer = 0;
+        
+        if (isShieldHit) {
+            this.hasShield = false;
+            this.isShieldBreaking = true;
+            this.shieldBreakTimer = 0;
+            this.damageType = 'shield';
+        } else {
+            this.damageType = 'hull';
+        }
+    }
+
     update(input, deltaTime) {
-        // Movimiento
-        let targetX = input.mouseX;
-        let targetY = input.mouseY;
-        if (targetY < this.minY) targetY = this.minY;
-        if (targetY > this.game.height - this.height/2) targetY = this.game.height - this.height/2;
-        if (targetX < this.width/2) targetX = this.width/2;
-        if (targetX > this.game.width - this.width/2) targetX = this.game.width - this.width/2;
+        this.x += (input.mouseX - this.x) * this.speed;
+        this.y += (input.mouseY - this.y) * this.speed;
 
-        this.x += (targetX - this.x) * this.speed;
-        this.y += (targetY - this.y) * this.speed;
-
-        // Disparo normal
+        // Disparo
         if (this.fireTimer > this.fireInterval) {
             this.shoot();
             this.fireTimer = 0; 
@@ -53,12 +68,12 @@ class Player {
             this.fireTimer += deltaTime; 
         }
 
-        // --- LÓGICA DE ACTIVACIÓN DEL LÁSER ---
-        const distToBtn = Math.sqrt(Math.pow(input.mouseX - this.btnX, 2) + Math.pow(input.mouseY - this.btnY, 2));
-        const isTouchingBtn = input.isButtonClicked && distToBtn < this.btnSize / 2;
+        if (this.isMultiShotActive) {
+            this.multiShotTimer -= deltaTime;
+            if (this.multiShotTimer <= 0) this.isMultiShotActive = false;
+        }
 
-// --- LÓGICA DE ACTIVACIÓN DEL LÁSER (Simplificada) ---
-        // Ahora input.isButtonClicked solo es true si un dedo tocó el botón específicamente
+        // Activación Láser
         if ((input.isSpacePressed || input.isButtonClicked) && this.isLaserReady) {
             this.isLaserActive = true;
             this.isLaserReady = false;
@@ -79,24 +94,34 @@ class Player {
             }
         }
 
-        // iFrames
+        // Animaciones
+        if (this.isShieldBreaking) this.shieldBreakTimer += deltaTime;
+
         if (this.isInvulnerable) {
             this.invulnerableTimer += deltaTime;
-            this.flashTimer += deltaTime;
-            if (this.flashTimer > this.flashInterval) {
-                this.isVisible = !this.isVisible;
-                this.flashTimer = 0;
+            if (this.damageType === 'hull') {
+                this.flashTimer += deltaTime;
+                if (this.flashTimer > this.flashInterval) {
+                    this.isVisible = !this.isVisible;
+                    this.flashTimer = 0;
+                }
             }
             if (this.invulnerableTimer > this.invulnerableDuration) {
                 this.isInvulnerable = false;
                 this.isVisible = true;
-                this.invulnerableTimer = 0;
+                this.damageType = 'none';
             }
         }
     }
 
     shoot() {
-        this.game.playerBullets.push(new Bullet(this.x, this.y - this.height / 2));
+        if (this.isMultiShotActive) {
+            this.game.playerBullets.push(new Bullet(this.x, this.y - this.height / 2));
+            this.game.playerBullets.push(new Bullet(this.x - 20, this.y - this.height / 4));
+            this.game.playerBullets.push(new Bullet(this.x + 20, this.y - this.height / 4));
+        } else {
+            this.game.playerBullets.push(new Bullet(this.x, this.y - this.height / 2));
+        }
     }
 
     draw(ctx) {
@@ -105,38 +130,54 @@ class Player {
 
         ctx.save();
         ctx.translate(this.x, this.y);
+        
         let img = Assets && Assets.images ? Assets.images.playerShip : null;
-        if (img && img.complete && img.naturalWidth !== 0) {
+        if (img && img.complete) {
             ctx.drawImage(img, -this.width / 2, -this.height / 2, this.width, this.height);
         } else {
             ctx.fillStyle = '#3b8e88';
             ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
         }
-        ctx.restore();
 
-        // Dibujar el botón HUD siempre visible
+        if (this.hasShield) {
+            ctx.beginPath();
+            ctx.arc(0, 0, this.width * 0.8, 0, Math.PI * 2);
+            ctx.strokeStyle = '#3b8e88';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]); 
+            ctx.stroke();
+            ctx.setLineDash([]); 
+        }
+
+        if (this.isShieldBreaking) {
+            const progress = this.shieldBreakTimer / this.shieldBreakDuration;
+            const expandRadius = (this.width * 0.8) + (progress * 40); 
+            const alpha = 1 - progress; 
+            ctx.beginPath();
+            ctx.arc(0, 0, expandRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(59, 142, 136, ${alpha})`;
+            ctx.lineWidth = 4 * alpha; 
+            ctx.stroke();
+        }
+
+        ctx.restore();
         this.drawLaserButton(ctx);
     }
 
     drawLaser(ctx) {
         ctx.save();
-        const laserWidth = 24;
         const gradient = ctx.createLinearGradient(this.x, this.y, this.x, 0);
         gradient.addColorStop(0, '#3b8e88');
         gradient.addColorStop(0.5, '#ffffff');
         gradient.addColorStop(1, 'rgba(59, 142, 136, 0)');
         ctx.fillStyle = gradient;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = '#3b8e88';
-        ctx.fillRect(this.x - laserWidth / 2, 0, laserWidth, this.y);
+        ctx.fillRect(this.x - 12, 0, 24, this.y);
         ctx.restore();
     }
 
     drawLaserButton(ctx) {
         ctx.save();
         ctx.translate(this.btnX, this.btnY);
-
-        // Fondo del botón
         ctx.beginPath();
         ctx.arc(0, 0, this.btnSize / 2, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(15, 18, 16, 0.8)';
@@ -145,7 +186,6 @@ class Player {
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Relleno de cooldown (Radial)
         if (!this.isLaserReady) {
             const progress = this.laserCooldownTimer / this.laserCooldown;
             ctx.beginPath();
@@ -154,8 +194,6 @@ class Player {
             ctx.fillStyle = 'rgba(59, 142, 136, 0.5)';
             ctx.fill();
         }
-
-        // Texto
         ctx.fillStyle = this.isLaserReady ? '#fff' : '#666';
         ctx.font = '10px "Press Start 2P"';
         ctx.textAlign = 'center';
