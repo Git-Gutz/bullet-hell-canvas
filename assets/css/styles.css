@@ -1,12 +1,217 @@
-/* Escalar el canvas responsivamente manteniendo el aspect ratio de 900x600 */
-#gameCanvas {
-    max-width: 100%;
-    height: auto;
-    background-color: #050510; /* Un azul muy oscuro tipo espacio */
-    cursor: crosshair; /* Puntero inicial, lo cambiaremos después */
+/* =========================================
+   1. VARIABLES: PALETA "RANDOM PLAY" (COZY RETRO)
+========================================= */
+:root {
+    --vhs-bg: #1c1b19;         /* Fondo oscuro, marrón/gris cálido */
+    --vcr-panel: #292724;      /* Color de plástico oscuro de equipo viejo */
+    --vcr-border: #3d3934;     /* Bisel del plástico */
+    --accent-mustard: #e5a91a; /* Amarillo cálido característico de ZZZ */
+    --accent-teal: #3b8e88;    /* Verde azulado vintage */
+    --text-main: #e2dfd8;      /* Blanco marfil, muy suave a la vista */
+    --crt-amber: #ffb800;      /* Color ámbar de pantalla terminal */
+    --crt-green: #5cdb5c;      /* Color verde fósforo apagado */
+    --button-red: #c94938;     /* Rojo ladrillo/vintage */
 }
 
-/* Evitar que el usuario seleccione texto accidentalmente mientras juega */
+* {
+    font-family: 'Press Start 2P', cursive !important;
+    box-sizing: border-box;
+    color: var(--text-main);
+}
+
+/* Suavizamos un poco la fuente arcade para que encaje con lo "cozy" */
+h4 { font-size: 1.5rem !important; letter-spacing: 1px; color: var(--accent-mustard); }
+h5, h6, p, span, small { font-size: 0.9rem !important; line-height: 1.8; }
+
+/* =========================================
+   2. ESTRUCTURA FIJA (FONDO CÁLIDO)
+========================================= */
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--vhs-bg);
+    /* Patrón de ruido muy sutil o líneas horizontales de VHS */
+    background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 2px,
+        rgba(0, 0, 0, 0.1) 4px
+    );
+}
 body {
-    user-select: none;
+    margin: 0;
+    padding: 0;
+    /* La ruta debe subir un nivel (..) para salir de la carpeta css y entrar a images */
+    background-image: url('../images/background/WPP.jpg');
+    background-size: cover; /* Para que cubra toda la pantalla */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Para que no se mueva al hacer scroll */
+}
+
+/* =========================================
+   3. NAV Y FOOTER (ESTILO CAJA DE VHS)
+========================================= */
+.navbar, footer {
+    background: var(--vcr-panel) !important;
+    border-bottom: 4px solid var(--accent-mustard);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+footer {
+    border-bottom: none;
+    border-top: 4px solid var(--vcr-border);
+}
+
+.navbar-brand {
+    color: var(--accent-mustard) !important;
+    text-shadow: none; /* Quitamos el brillo neón */
+}
+.navbar-text {
+    color: var(--accent-teal) !important;
+}
+
+/* =========================================
+   4. TARJETA UI (PANEL ANALÓGICO ROBUSTO)
+========================================= */
+.card {
+    background: var(--vcr-panel) !important;
+    border: 4px solid var(--vcr-border) !important;
+    border-radius: 8px; /* Bordes menos curvos, más como hardware */
+    box-shadow: 
+        inset 2px 2px 0px rgba(255,255,255,0.05),
+        6px 6px 0px rgba(0,0,0,0.4); /* Sombra sólida, no difuminada */
+}
+
+.card-header {
+    background: #1e1c1a !important;
+    border-bottom: 4px solid var(--vcr-border) !important;
+}
+
+/* Caja de instrucciones estilo etiqueta de papel/cinta */
+.instructions-box {
+    background: #d8d3c5; /* Color papel viejo */
+    border: 2px solid #b8b2a1;
+    border-radius: 2px;
+    padding: 12px;
+    color: #292724 !important; /* Letra oscura sobre fondo claro */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+.instructions-box strong { color: #292724 !important; }
+
+/* Colores de Stats (Simulando display VFD de la época) */
+.text-info { color: var(--crt-green) !important; }
+.text-warning { color: var(--crt-amber) !important; }
+.text-danger { color: var(--button-red) !important; }
+.text-white { color: var(--text-main) !important; }
+
+/* =========================================
+   5. BOTONES (TÁCTILES Y GRUESOS)
+========================================= */
+.btn {
+    border-radius: 4px !important;
+    border: 2px solid transparent !important;
+    transition: 0.1s;
+    text-transform: uppercase;
+    font-weight: bold;
+    /* Efecto de botón físico sin presionar */
+    transform: translateY(0);
+}
+
+.btn:active {
+    /* Efecto al presionar (se hunde) */
+    transform: translateY(4px);
+    box-shadow: none !important;
+}
+
+/* Botón Iniciar (Mostaza ZZZ) */
+.btn-arcade-success { 
+    background: var(--accent-mustard); 
+    color: #1a1a1a; 
+    box-shadow: 0 6px 0 #9c730e; 
+}
+.btn-arcade-success:hover { background: #f0b72e; color: #000; }
+
+/* Botón Pausa (Teal) */
+.btn-arcade-warning { 
+    background: var(--accent-teal); 
+    color: #fff; 
+    box-shadow: 0 6px 0 #21615d; 
+}
+.btn-arcade-warning:hover:not(:disabled) { background: #4bc0b9; color: #000; }
+.btn-arcade-warning:disabled { background: #3d3934; box-shadow: 0 6px 0 #1c1b19; color: #555; }
+
+/* Botón Reiniciar (Rojo Vintage) */
+.btn-arcade-danger { 
+    background: var(--button-red); 
+    color: #fff; 
+    box-shadow: 0 6px 0 #7a2a1f; 
+}
+.btn-arcade-danger:hover { background: #e35a4b; color: #fff; }
+
+/* =========================================
+   CONTENEDOR CANVAS (TV DE TUBO VIEJA)
+========================================= */
+.arcade-window {
+    position: relative;
+    width: 1200px;
+    height: 900px;
+    max-width: 100%;
+    max-height: 100%;
+    /* Bisel del televisor */
+    background: #111;
+    border: 12px solid #222;
+    border-radius: 16px;
+    overflow: hidden;
+    
+    box-shadow: inset 10px 10px 20px 5px #000000;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    background: #0f1210; /* Un gris/verde muy oscuro */
+    display: block;
+}
+
+/* Efecto de cristal de TV (CRT) más cálido */
+.crt-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Líneas de escaneo más suaves y en tonos ámbar/sepia muy sutiles */
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.15) 50%), 
+        linear-gradient(90deg, rgba(255, 150, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    background-size: 100% 4px, 3px 100%;
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8); /* Viñeteo fuerte en las esquinas */
+}
+
+/* Reflejo ligero en la pantalla */
+.arcade-window::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 40%);
+    pointer-events: none;
+
+    
+}
+/* Tamaño específico para los corazones de las vidas */
+#ui-lives {
+    font-size: 2rem !important; /* Hazlos más grandes que el texto normal */
+    letter-spacing: 2px; /* Un poco de separación entre cada corazón */
+    vertical-align: middle; /* Para que no se vean desalineados con la palabra "VIDAS:" */
 }
