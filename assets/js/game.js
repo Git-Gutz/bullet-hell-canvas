@@ -16,15 +16,20 @@ class Game {
         this.lives = 3;
         this.score = 0;
         
+        // --- NUEVO: CARGAR HIGH SCORE DE LOCALSTORAGE ---
+        this.highScore = localStorage.getItem('automata_highscore') || 0;
+        
         this.enemies = []; 
         this.enemyTimer = 0;
         this.enemyInterval = 1500; 
 
-        // --- NUEVO: LISTA DE BALAS ENEMIGAS ---
         this.enemyBullets = [];
 
         this.stars = [];
         this.initBackground();
+        
+        // --- NUEVO: Actualizar UI al iniciar para mostrar el High Score ---
+        this.updateUI();
     }
 
     initBackground() {
@@ -80,7 +85,7 @@ class Game {
         this.playerBullets.forEach(bullet => bullet.update());
         this.playerBullets = this.playerBullets.filter(bullet => !bullet.markedForDeletion);
 
-        // --- NUEVO: ACTUALIZAR BALAS ENEMIGAS ---
+        // Actualizar Balas Enemigas
         this.enemyBullets.forEach(bullet => bullet.update());
         this.enemyBullets = this.enemyBullets.filter(bullet => !bullet.markedForDeletion);
 
@@ -132,6 +137,8 @@ class Game {
                     
                     if (enemy.hp <= 0) {
                         enemy.markedForDeletion = true; 
+                        // --- NUEVO: SUMAR PUNTOS AL DESTRUIR ---
+                        this.addScore(enemy.scoreValue);
                     }
                 }
             });
@@ -143,10 +150,12 @@ class Game {
             const dy = this.player.y - enemy.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < 40) {
+            if (!this.player.isInvulnerable && distance < 40) {
                 enemy.markedForDeletion = true;
                 this.lives--;
                 this.updateUI();
+                
+                this.player.isInvulnerable = true; 
 
                 if (this.lives <= 0) {
                     this.stop();
@@ -156,17 +165,18 @@ class Game {
             }
         });
 
-        // --- NUEVO: COLISIÓN BALAS ENEMIGAS VS JUGADOR ---
+        // Colisión: Balas Enemigas vs Jugador
         this.enemyBullets.forEach(bullet => {
             const dx = this.player.x - bullet.x;
             const dy = this.player.y - bullet.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Umbral de 30 (27px de hitbox + 3px de la bala)
-            if (distance < 30) {
-                bullet.markedForDeletion = true; // La bala desaparece
+            if (!this.player.isInvulnerable && distance < 30) {
+                bullet.markedForDeletion = true; 
                 this.lives--;
                 this.updateUI();
+                
+                this.player.isInvulnerable = true;
 
                 if (this.lives <= 0) {
                     this.stop();
@@ -190,10 +200,7 @@ class Game {
         });
 
         this.playerBullets.forEach(bullet => bullet.draw(this.ctx));
-        
-        // --- NUEVO: DIBUJAR BALAS ENEMIGAS ---
         this.enemyBullets.forEach(bullet => bullet.draw(this.ctx));
-        
         this.enemies.forEach(enemy => enemy.draw(this.ctx));
         this.player.draw(this.ctx);
 
@@ -208,8 +215,31 @@ class Game {
         }
     }
 
+    // --- NUEVO: MÉTODO PARA AGREGAR PUNTOS Y GUARDAR HIGH SCORE ---
+    addScore(points) {
+        this.score += points;
+        
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('automata_highscore', this.highScore);
+        }
+        
+        this.updateUI();
+    }
+
+    // --- ACTUALIZADO: REFLEJAR SCORE EN EL HTML ---
     updateUI() {
+        const scoreElement = document.getElementById('ui-score');
+        const highScoreElement = document.getElementById('ui-highscore');
         const livesElement = document.getElementById('ui-lives');
+
+        if (scoreElement) {
+            scoreElement.textContent = this.score.toString().padStart(6, '0');
+        }
+        if (highScoreElement) {
+            // Asegurarse de que highScore sea tratado como string o número antes del padStart
+            highScoreElement.textContent = Number(this.highScore).toString().padStart(6, '0');
+        }
         if (livesElement) {
             livesElement.textContent = '♥'.repeat(this.lives);
         }

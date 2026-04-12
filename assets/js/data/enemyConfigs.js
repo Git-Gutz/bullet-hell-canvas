@@ -1,18 +1,39 @@
 // Data ONLY: Define la identidad y comportamiento base de cada enemigo
 const EnemyConfigs = {
+    // El enemigo básico: fácil de matar, patrón predecible
     grunt: {
-        width: 48, height: 48, hp: 2, speed: 1.5, scoreValue: 10, 
-        color: '#c94938', imageKey: 'enemyGrunt', fireRate: 2000,
-        patterns: ['straightDive', 'zigzag'] // Patrones simples
+        width: 48, 
+        height: 48, 
+        hp: 2, 
+        speed: 1.5, 
+        scoreValue: 10, 
+        color: '#c94938', 
+        imageKey: 'enemyGrunt', 
+        fireRate: 2000,
+        patterns: ['straightDive', 'zigzag'] 
     },
+    // Rápido y difícil de predecir: requiere mejores reflejos
     striker: {
-        width: 40, height: 50, hp: 4, speed: 2.5, scoreValue: 20, 
-        color: '#e5a91a', imageKey: 'enemyStriker', fireRate: 1500,
-        patterns: ['diagonalCross', 'sweepPass'] // Patrones agresivos y amplios
+        width: 40, 
+        height: 50, 
+        hp: 4, 
+        speed: 2.5, 
+        scoreValue: 25, // Aumentado para premiar la dificultad
+        color: '#e5a91a', 
+        imageKey: 'enemyStriker', 
+        fireRate: 1500,
+        patterns: ['diagonalCross', 'sweepPass']
     },
+    // El "miniboss": aguanta mucho daño y tiene un comportamiento táctico
     elite: {
-        width: 64, height: 64, hp: 10, speed: 1.0, scoreValue: 50, 
-        color: '#3b8e88', imageKey: 'enemyElite', fireRate: 1000,
-        patterns: ['hoverAndRetreat'] // Patrones de control/bloqueo
+        width: 64, 
+        height: 64, 
+        hp: 10, 
+        speed: 1.0, 
+        scoreValue: 100, // Gran recompensa por destruirlo
+        color: '#3b8e88', 
+        imageKey: 'enemyElite', 
+        fireRate: 1000,
+        patterns: ['hoverAndRetreat']
     }
 };
