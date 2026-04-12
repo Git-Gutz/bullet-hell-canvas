@@ -1,62 +1,72 @@
 class Player {
     constructor(game) {
         this.game = game;
-        
-        // Ajusta estas dimensiones al tamaño real que quieras que tenga tu nave en pantalla
         this.width = 64; 
         this.height = 64;
-        
         this.x = this.game.width / 2;
-        this.y = this.game.height - 60;
+        this.y = this.game.height - 100;
         
-        this.minY = this.game.height * 0.40;
+        // Área de movimiento al 60% (Tu excelente modificación)
+        this.minY = this.game.height * 0.40; 
         this.speed = 0.15;
-        this.hitboxRadius = 7; // Mantenemos la hitbox reducida
+        this.hitboxRadius = 27; 
+
+        // --- SISTEMA DE AUTO-FIRE (Restaurado) ---
+        this.fireTimer = 0;
+        this.fireInterval = 200; // Cadencia: dispara cada 200ms
     }
 
-    update(input) {
+    // Recibimos deltaTime del motor para ser precisos con el tiempo
+    update(input, deltaTime) {
         let targetX = input.mouseX;
         let targetY = input.mouseY;
 
+        // Limites de pantalla
         if (targetY < this.minY) targetY = this.minY;
         if (targetY > this.game.height - this.height/2) targetY = this.game.height - this.height/2;
         if (targetX < this.width/2) targetX = this.width/2;
         if (targetX > this.game.width - this.width/2) targetX = this.game.width - this.width/2;
 
+        // Movimiento Suave
         this.x += (targetX - this.x) * this.speed;
         this.y += (targetY - this.y) * this.speed;
+
+        // --- LÓGICA DE DISPARO ---
+        if (this.fireTimer > this.fireInterval) {
+            this.shoot();
+            this.fireTimer = 0; // Reiniciar cronómetro
+        } else {
+            this.fireTimer += deltaTime; // Sumar tiempo transcurrido
+        }
+    }
+
+    shoot() {
+        // Creamos la bala en la punta de la nave y la mandamos al motor
+        this.game.playerBullets.push(new Bullet(this.x, this.y - this.height / 2));
     }
 
     draw(ctx) {
         ctx.save();
         ctx.translate(this.x, this.y);
 
-        // --- 1. DIBUJAR EL SPRITE ---
-        // Verificamos si la imagen existe en nuestro Assets manager
-        if (Assets.images.playerShip) {
-            // drawImage(imagen, posición X, posición Y, ancho, alto)
-            // Centramos la imagen restando la mitad de su ancho y alto
-            ctx.drawImage(
-                Assets.images.playerShip, 
-                -this.width / 2, 
-                -this.height / 2, 
-                this.width, 
-                this.height
-            );
+        // 1. DIBUJAR SPRITE O FALLBACK SEGURO
+        let img = Assets && Assets.images ? Assets.images.playerShip : null;
+        
+        if (img && img.complete && img.naturalWidth !== 0) {
+            ctx.drawImage(img, -this.width / 2, -this.height / 2, this.width, this.height);
         } else {
-            // Fallback: Si no carga la imagen, dibujamos un cuadrado rojo
-            ctx.fillStyle = 'red';
-            ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+            // Nave poligonal Teal de emergencia
+            ctx.fillStyle = '#3b8e88';
+            ctx.beginPath();
+            ctx.moveTo(0, -this.height/2);
+            ctx.lineTo(this.width/2, this.height/2);
+            ctx.lineTo(0, this.height/6);
+            ctx.lineTo(-this.width/2, this.height/2);
+            ctx.closePath();
+            ctx.fill();
         }
 
-        // --- 2. DIBUJAR EL NÚCLEO (Hitbox Visual) ---
-        ctx.fillStyle = '#ffb800'; 
-        ctx.beginPath();
-        ctx.arc(0, 0, this.hitboxRadius, 0, Math.PI * 2);
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#ffb800';
-        ctx.fill();
-
+       
         ctx.restore();
     }
 }

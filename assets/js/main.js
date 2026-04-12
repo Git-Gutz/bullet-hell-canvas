@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // IMPORTANTE: Pon la ruta correcta hacia tu imagen.
     // Ejemplo: '../images/player/nave.png' o './assets/images/player/nave.png'
     const imageSources = {
-        playerShip: './assets/images/player/playerShip1_blue.png' // <--- CAMBIA ESTO POR TU RUTA
+        playerShip: './assets/images/player/playerShip1_blue.png', // <--- CAMBIA ESTO POR TU RUTA
+        enemyGrunt: './assets/images/enemies/grunt.png'
     };
 
     // 2. Elementos de UI
