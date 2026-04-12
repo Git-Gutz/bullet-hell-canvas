@@ -28,12 +28,11 @@ h5, h6, p, span, small { font-size: 0.9rem !important; line-height: 1.8; }
 ========================================= */
 html, body {
     width: 100vw;
-    min-height: 100vh; /* Permite crecer en móviles */
+    height: 100dvh; /* dvh: Dynamic Viewport Height (Evita bug de barra de safari/chrome) */
     margin: 0;
     padding: 0;
-    overflow-y: auto !important; /* Permite scroll en móvil por defecto */
+    overflow: hidden !important; /* Bloqueo de scroll estricto para TODO dispositivo */
     background-color: var(--vhs-bg);
-    /* Patrón de ruido muy sutil o líneas horizontales de VHS */
     background-image: repeating-linear-gradient(
         0deg,
         transparent,
@@ -44,12 +43,11 @@ html, body {
 }
 
 body {
-    /* La ruta debe subir un nivel (..) para salir de la carpeta css y entrar a images */
     background-image: url('../images/background/WPP.jpg');
-    background-size: cover; /* Para que cubra toda la pantalla */
+    background-size: cover; 
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed; /* Para que no se mueva al hacer scroll */
+    background-attachment: fixed;
 }
 
 /* Contenedor flexible principal */
@@ -58,6 +56,10 @@ body {
     flex-direction: column;
 }
 
+.content-wrapper {
+    height: calc(100dvh - 120px); /* Restamos el espacio exacto del Nav y Footer */
+    overflow: hidden;
+}
 /* =========================================
    3. NAV Y FOOTER (ESTILO CAJA DE VHS)
 ========================================= */
@@ -222,18 +224,51 @@ footer {
 }
 
 /* =========================================
-   7. MEDIA QUERIES (COMPORTAMIENTO ESCRITORIO)
+   7. MEDIA QUERIES Y OPTIMIZACIÓN MÓVIL
 ========================================= */
+/* COMPORTAMIENTO MÓVIL (Por defecto < 992px) */
+.game-column {
+    height: auto;
+    flex: 0 0 auto;
+}
+
+.info-column {
+    flex: 1 1 auto;
+    min-height: 0; /* Permite que la tarjeta se encoja sin romper el flexbox */
+}
+
+/* Reducción del HUD para que quepa sin Scroll en teléfonos */
+@media (max-width: 991px) {
+    .card-body {
+        padding: 0.5rem; /* Menos relleno interno */
+    }
+    
+    .instructions-box {
+        display: none !important; /* Ocultamos las instrucciones para ganar espacio */
+    }
+
+    /* Convertimos la lista vertical en un layout horizontal compacto */
+    .hud-stats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .hud-stats h5, .hud-stats h6 { margin-bottom: 4px; width: 48%; font-size: 0.65rem !important; }
+    .hud-stats p { margin-bottom: 0; width: 30%; font-size: 0.6rem !important; text-align: center; }
+    
+    .hud-stats hr { display: none; } /* Quitamos la línea separadora */
+    
+    #ui-lives { font-size: 1.2rem !important; } /* Corazones un poco más pequeños en móvil */
+    
+    .btn-lg { padding: 0.4rem; font-size: 0.7rem !important; } /* Botones más delgados */
+}
+
+/* COMPORTAMIENTO ESCRITORIO (PC >= 992px) */
 @media (min-width: 992px) {
-    html, body {
-        height: 100vh; /* Fija la altura total */
-        overflow: hidden !important; /* Bloquea el scroll en PC */
-    }
-    .content-wrapper {
-        height: calc(100vh - 120px); /* Altura restando Nav y Footer */
-        overflow: hidden;
-    }
     .game-column, .info-column {
-        height: 100%;
+        height: 100%; /* En PC, ambas columnas toman el 100% de la altura disponible */
     }
 }
