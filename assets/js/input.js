@@ -1,37 +1,51 @@
 class InputHandler {
     constructor(canvas) {
-        // Empezamos en el centro de la parte inferior
-        this.mouseX = canvas.width / 2;
-        this.mouseY = canvas.height - 50;
-        this.isFiringLaser = false; // Lo usaremos en el futuro para el poder especial
+        this.canvas = canvas;
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.isSpacePressed = false;
+        this.isButtonClicked = false;
 
-        // Evento para PC (Mouse)
-        canvas.addEventListener('mousemove', (e) => {
-            this.updateCoordinates(e.clientX, e.clientY, canvas);
+        // Función para calcular la posición real
+        const updatePos = (clientX, clientY) => {
+            const rect = this.canvas.getBoundingClientRect();
+            // Escalamos la posición del mouse al tamaño interno del canvas
+            this.mouseX = (clientX - rect.left) * (this.canvas.width / rect.width);
+            this.mouseY = (clientY - rect.top) * (this.canvas.height / rect.height);
+        };
+
+        // Eventos de Mouse
+        this.canvas.addEventListener('mousemove', (e) => {
+            updatePos(e.clientX, e.clientY);
         });
 
-        // Eventos para Móviles (Pantalla táctil)
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Evita que la pantalla intente hacer scroll al jugar
-            this.updateCoordinates(e.touches[0].clientX, e.touches[0].clientY, canvas);
+        this.canvas.addEventListener('mousedown', () => this.isButtonClicked = true);
+        window.addEventListener('mouseup', () => this.isButtonClicked = false);
+
+        // Eventos de Touch (Móvil)
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                updatePos(e.touches[0].clientX, e.touches[0].clientY);
+            }
+            e.preventDefault(); // Evita scroll
         }, { passive: false });
 
-        // Eventos de teclado (Para el láser más adelante)
+        this.canvas.addEventListener('touchstart', (e) => {
+            this.isButtonClicked = true;
+            if (e.touches.length > 0) {
+                updatePos(e.touches[0].clientX, e.touches[0].clientY);
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', () => this.isButtonClicked = false);
+
+        // Teclado
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') this.isFiringLaser = true;
+            if (e.code === 'Space') this.isSpacePressed = true;
         });
         window.addEventListener('keyup', (e) => {
-            if (e.code === 'Space') this.isFiringLaser = false;
+            if (e.code === 'Space') this.isSpacePressed = false;
         });
-    }
-
-    // Calcula la posición real dentro del lienzo de 900x600, sin importar cómo el CSS lo haya encogido
-    updateCoordinates(clientX, clientY, canvas) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
-        this.mouseX = (clientX - rect.left) * scaleX;
-        this.mouseY = (clientY - rect.top) * scaleY;
     }
 }

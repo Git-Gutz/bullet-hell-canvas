@@ -88,6 +88,32 @@ class Game {
         // Actualizar Balas Enemigas
         this.enemyBullets.forEach(bullet => bullet.update());
         this.enemyBullets = this.enemyBullets.filter(bullet => !bullet.markedForDeletion);
+       // --- COLISIONES DEL LÁSER ---
+if (this.player.isLaserActive) {
+    const laserLeft = this.player.x - 12;
+    const laserRight = this.player.x + 12;
+
+    // Borrar balas enemigas que toquen el láser
+    this.enemyBullets.forEach(bullet => {
+        if (bullet.x > laserLeft && bullet.x < laserRight && bullet.y < this.player.y) {
+            bullet.markedForDeletion = true;
+        }
+    });
+
+    // Dañar enemigos
+    this.enemies.forEach(enemy => {
+        if (enemy.x + enemy.width/2 > laserLeft && 
+            enemy.x - enemy.width/2 < laserRight && 
+            enemy.y < this.player.y) {
+            
+            enemy.hp -= 0.4; // Daño continuo por frame
+            if (enemy.hp <= 0) {
+                enemy.markedForDeletion = true;
+                this.addScore(enemy.scoreValue);
+            }
+        }
+    });
+}
 
         // Generar enemigos (Multidireccional)
         if (this.enemyTimer > this.enemyInterval) {
