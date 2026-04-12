@@ -11,16 +11,17 @@ class Game {
 
         this.input = new InputHandler(this.canvas);
         this.playerBullets = [];
-        this.player = new Player(this); // (Corregido: Solo se llama una vez)
+        this.player = new Player(this); 
         
-        // --- NUEVO: ESTADO DEL JUGADOR ---
         this.lives = 3;
         this.score = 0;
         
-        // --- NUEVO: Variables para enemigos ---
         this.enemies = []; 
         this.enemyTimer = 0;
-        this.enemyInterval = 1500; // Un enemigo nuevo cada 1.5 segundos
+        this.enemyInterval = 1500; 
+
+        // --- NUEVO: LISTA DE BALAS ENEMIGAS ---
+        this.enemyBullets = [];
 
         this.stars = [];
         this.initBackground();
@@ -55,13 +56,10 @@ class Game {
 
     loop(timestamp) {
         if (!this.isRunning) return;
-
         let deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
-
         this.update(deltaTime);
         this.draw();
-
         requestAnimationFrame((timestamp) => this.loop(timestamp));
     }
 
@@ -78,10 +76,15 @@ class Game {
 
         this.player.update(this.input, deltaTime);
 
+        // Actualizar Balas
         this.playerBullets.forEach(bullet => bullet.update());
         this.playerBullets = this.playerBullets.filter(bullet => !bullet.markedForDeletion);
 
-        // --- Generar enemigos (Multidireccional) ---
+        // --- NUEVO: ACTUALIZAR BALAS ENEMIGAS ---
+        this.enemyBullets.forEach(bullet => bullet.update());
+        this.enemyBullets = this.enemyBullets.filter(bullet => !bullet.markedForDeletion);
+
+        // Generar enemigos (Multidireccional)
         if (this.enemyTimer > this.enemyInterval) {
             let spawnSide = Math.floor(Math.random() * 3);
             let spawnX, spawnY, vx, vy;
@@ -112,10 +115,10 @@ class Game {
             this.enemyTimer += deltaTime;
         }
 
-        // --- Actualizar enemigos ---
+        // Actualizar enemigos
         this.enemies.forEach(enemy => enemy.update(deltaTime));
 
-        // --- Colisiones (Balas vs Enemigos) ---
+        // Colisiones: Balas del Jugador vs Enemigos
         this.enemies.forEach(enemy => {
             this.playerBullets.forEach(bullet => {
                 if (
@@ -124,42 +127,56 @@ class Game {
                     bullet.y < enemy.y + enemy.height/2 &&
                     bullet.y + bullet.height > enemy.y - enemy.height/2
                 ) {
-                    bullet.markedForDeletion = true; // Destruir bala
-                    enemy.hp--; // Bajar vida al enemigo
+                    bullet.markedForDeletion = true; 
+                    enemy.hp--; 
                     
                     if (enemy.hp <= 0) {
-                        enemy.markedForDeletion = true; // Destruir enemigo
+                        enemy.markedForDeletion = true; 
                     }
                 }
             });
         });
 
-        // --- NUEVO: COLISIÓN ENEMIGO VS JUGADOR ---
+        // Colisión: Enemigo Físico vs Jugador
         this.enemies.forEach(enemy => {
-            // Calculamos la distancia entre el centro del jugador y el centro del enemigo
             const dx = this.player.x - enemy.x;
             const dy = this.player.y - enemy.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Si la distancia es menor a la suma de la hitbox del jugador y parte del cuerpo del enemigo
-            if (distance < (this.player.hitboxRadius + enemy.width / 3)) {
-                // 1. Desaparece el enemigo
+            if (distance < 40) {
                 enemy.markedForDeletion = true;
-                
-                // 2. Restar vida
                 this.lives--;
-                this.updateUI(); // Reflejar en el HTML
+                this.updateUI();
 
-                // 3. Comprobar Game Over
                 if (this.lives <= 0) {
                     this.stop();
                     alert("SISTEMA COLAPSADO - GAME OVER");
-                    location.reload(); // Reinicio rápido
+                    location.reload(); 
                 }
             }
         });
 
-        // --- Limpiar enemigos muertos ---
+        // --- NUEVO: COLISIÓN BALAS ENEMIGAS VS JUGADOR ---
+        this.enemyBullets.forEach(bullet => {
+            const dx = this.player.x - bullet.x;
+            const dy = this.player.y - bullet.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Umbral de 30 (27px de hitbox + 3px de la bala)
+            if (distance < 30) {
+                bullet.markedForDeletion = true; // La bala desaparece
+                this.lives--;
+                this.updateUI();
+
+                if (this.lives <= 0) {
+                    this.stop();
+                    alert("SISTEMA COLAPSADO - GAME OVER");
+                    location.reload(); 
+                }
+            }
+        });
+
+        // Limpiar enemigos muertos
         this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion);
     }
 
@@ -174,9 +191,10 @@ class Game {
 
         this.playerBullets.forEach(bullet => bullet.draw(this.ctx));
         
-        // --- Dibujar enemigos ---
-        this.enemies.forEach(enemy => enemy.draw(this.ctx));
+        // --- NUEVO: DIBUJAR BALAS ENEMIGAS ---
+        this.enemyBullets.forEach(bullet => bullet.draw(this.ctx));
         
+        this.enemies.forEach(enemy => enemy.draw(this.ctx));
         this.player.draw(this.ctx);
 
         if (this.isPaused) {
@@ -190,11 +208,9 @@ class Game {
         }
     }
 
-    // --- NUEVO: ACTUALIZAR INTERFAZ (Corazones) ---
     updateUI() {
         const livesElement = document.getElementById('ui-lives');
         if (livesElement) {
-            // Genera una cadena de corazones basada en el número de vidas
             livesElement.textContent = '♥'.repeat(this.lives);
         }
     }
