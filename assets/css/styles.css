@@ -1,0 +1,12 @@
+/* Escalar el canvas responsivamente manteniendo el aspect ratio de 900x600 */
+#gameCanvas {
+    max-width: 100%;
+    height: auto;
+    background-color: #050510; /* Un azul muy oscuro tipo espacio */
+    cursor: crosshair; /* Puntero inicial, lo cambiaremos después */
+}
+
+/* Evitar que el usuario seleccione texto accidentalmente mientras juega */
+body {
+    user-select: none;
+}

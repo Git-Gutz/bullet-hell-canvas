@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automata Hell - Proyecto Graficación 2D</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="data:,">
+</head>
+<body class="bg-dark text-light">
+
+    <nav class="navbar navbar-dark bg-secondary mb-3 shadow">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">Proyecto: Graficación 2D</span>
+            <span class="navbar-text text-white">
+                Desarrollador: Leonardo | Ing. en Sistemas Computacionales
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row gx-3">
+            <div class="col-lg-8 mb-3 d-flex justify-content-center align-items-center">
+                <canvas id="gameCanvas" width="900" height="600" class="shadow-lg rounded border border-secondary"></canvas>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card bg-secondary text-white shadow-lg h-100">
+                    <div class="card-header border-bottom border-dark text-center">
+                        <h4 class="mb-0">ESTADO DEL SISTEMA</h4>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        
+                        <div class="mb-4">
+                            <h5 class="text-info">Score: <span id="ui-score" class="text-white">000000</span></h5>
+                            <h6 class="text-warning">High Score: <span id="ui-highscore" class="text-white">000000</span></h6>
+                            <hr class="border-dark">
+                            <p class="mb-1 fs-5">Nivel: <span id="ui-level" class="fw-bold">1</span></p>
+                            <p class="mb-1 fs-5">Horda: <span id="ui-wave" class="fw-bold">1/4</span></p>
+                            <p class="mb-1 fs-5">Vidas: <span id="ui-lives" class="text-danger fw-bold">♥♥♥</span></p>
+                        </div>
+
+                        <div class="alert alert-dark text-light small mb-4" role="alert">
+                            <strong>Instrucciones:</strong><br>
+                            - El cursor guía la nave.<br>
+                            - Clic izquierdo / Espacio: Disparo Láser (10s CD).<br>
+                            - Sobrevive y destruye todo.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button id="btn-start" class="btn btn-success btn-lg">Start Game</button>
+                            <button id="btn-pause" class="btn btn-warning" disabled>Pause</button>
+                            <button id="btn-restart" class="btn btn-danger">Restart Level</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-center text-muted py-3 mt-auto">
+        <small>&copy; 2026 Instituto Tecnológico de Pachuca - Desarrollo de Videojuego WebGL/Canvas API</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    </body>
+</html>
