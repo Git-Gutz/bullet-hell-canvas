@@ -57,7 +57,9 @@ class Player {
         const distToBtn = Math.sqrt(Math.pow(input.mouseX - this.btnX, 2) + Math.pow(input.mouseY - this.btnY, 2));
         const isTouchingBtn = input.isButtonClicked && distToBtn < this.btnSize / 2;
 
-        if ((input.isSpacePressed || isTouchingBtn) && this.isLaserReady) {
+// --- LÓGICA DE ACTIVACIÓN DEL LÁSER (Simplificada) ---
+        // Ahora input.isButtonClicked solo es true si un dedo tocó el botón específicamente
+        if ((input.isSpacePressed || input.isButtonClicked) && this.isLaserReady) {
             this.isLaserActive = true;
             this.isLaserReady = false;
             this.laserTimer = 0;
