@@ -1,6 +1,6 @@
 /**
  * ARCHIVO: assets/js/game.js
- * FASE: 15 (Game Feel - Impactos y Destrucción)
+ * FASE: 16 (Persistencia de High Score y Game Feel Final)
  * PROYECTO: HELLFRAME - I.T. Pachuca
  */
 
@@ -20,10 +20,12 @@ class Game {
         // --- ESTADO DEL JUGADOR ---
         this.lives = 3;
         this.score = 0;
-        this.highScore = localStorage.getItem('automata_highscore') || 0;
+        
+        // 🚩 FASE 16: Recuperamos el High Score de LocalStorage (Si no existe, es 0)
+        this.highScore = parseInt(localStorage.getItem('hellframe_highscore')) || 0;
         
         // --- MODO DIOS (Cambiar a false para dificultad real) ---
-        this.godMode = true; 
+        this.godMode = false; 
 
         // --- POOLS DE ENTIDADES ---
         this.playerBullets = [];
@@ -66,7 +68,6 @@ class Game {
         }
     }
 
-    // --- SISTEMA DE NAVEGACIÓN Y REINICIO ---
     togglePause() {
         this.isPaused = !this.isPaused;
     }
@@ -92,7 +93,7 @@ class Game {
     }
 
     returnToMenu() {
-        this.isRunning = false; // Detiene la lógica
+        this.isRunning = false;
         this.enemies = [];
         this.playerBullets = [];
         this.enemyBullets = [];
@@ -114,7 +115,6 @@ class Game {
     }
 
     update(deltaTime) {
-        // 🛡️ BLOQUEO DE SEGURIDAD: Si no está corriendo o está pausado, salimos.
         if (!this.isRunning || this.isPaused) return;
 
         this.stars.forEach(s => {
@@ -148,21 +148,19 @@ class Game {
     }
 
     handleCollisions() {
-        // --- ⚡ LÓGICA DEL LÁSER (DAÑO POR FRAME) ---
         if (this.player.isLaserActive) {
             const lLeft = this.player.x - 15;
             const lRight = this.player.x + 15;
 
             this.enemies.forEach(e => {
                 if (e.x + e.width/2 > lLeft && e.x - e.width/2 < lRight && e.y < this.player.y) {
-                    e.hp -= 0.15; // Ajusta este valor para la potencia del láser
+                    e.hp -= 0.15;
                     if (e.hp <= 0 && !e.markedForDeletion) {
                         e.markedForDeletion = true;
                         this.addScore(e.scoreValue);
                         this.checkDrop(e);
                         
                         if (e.isBoss) {
-                            // 🚩 GAME FEEL: MUERTE DEL BOSS (Láser)
                             if (window.triggerShake) window.triggerShake(25, 1200);
                             if (window.triggerFlash) window.triggerFlash('white', 600);
                             setTimeout(() => this.gameOver(true), 1000);
@@ -172,7 +170,6 @@ class Game {
             });
         }
 
-        // --- 🔫 LÓGICA DE PROYECTILES ---
         this.enemies.forEach(e => {
             this.playerBullets.forEach(b => {
                 if (this.checkCollision(b, e)) {
@@ -184,7 +181,6 @@ class Game {
                         this.checkDrop(e);
                         
                         if (e.isBoss) {
-                            // 🚩 GAME FEEL: MUERTE DEL BOSS (Proyectil)
                             if (window.triggerShake) window.triggerShake(25, 1200);
                             if (window.triggerFlash) window.triggerFlash('white', 600);
                             setTimeout(() => this.gameOver(true), 1000);
@@ -194,7 +190,6 @@ class Game {
             });
         });
 
-        // --- 💥 LÓGICA DE DAÑO AL JUGADOR ---
         this.enemies.forEach(e => {
             if (this.getDist(this.player, e) < 40) this.handlePlayerHit(e);
         });
@@ -237,7 +232,6 @@ class Game {
         if (type === 'bomb') {
             this.enemies.forEach(e => { if(!e.isBoss){ e.hp = 0; e.markedForDeletion = true; this.addScore(e.scoreValue); } });
             this.enemyBullets = [];
-            // Opcional: Shake para la bomba!
             if (window.triggerShake) window.triggerShake(10, 400); 
         }
     }
@@ -248,14 +242,12 @@ class Game {
         
         if (this.player.hasShield) { 
             this.player.takeDamage(true); 
-            // 🚩 GAME FEEL: Rotura de escudo (temblor leve)
             if (window.triggerShake) window.triggerShake(5, 100);
         } 
         else {
             this.lives--; 
             this.player.takeDamage(false);
 
-            // 🚩 GAME FEEL: PÉRDIDA DE VIDA (Temblor severo y destello rojo)
             if (window.triggerShake) window.triggerShake(12, 300);
             if (window.triggerFlash) window.triggerFlash('red', 150);
 
@@ -266,9 +258,10 @@ class Game {
 
     addScore(pts) {
         this.score += pts;
+        // 🚩 FASE 16: Actualizar y persistir el High Score
         if (this.score > this.highScore) {
             this.highScore = this.score;
-            localStorage.setItem('automata_highscore', this.highScore);
+            localStorage.setItem('hellframe_highscore', this.highScore);
         }
         this.updateUI();
     }
@@ -278,8 +271,13 @@ class Game {
         const l = document.getElementById('ui-lives');
         const lvl = document.getElementById('ui-level');
         const wv = document.getElementById('ui-wave');
+        // 🚩 FASE 16: Si tienes un elemento para el High Score en el HTML, ponlo aquí
+        const hs = document.getElementById('ui-highscore');
+
         if (s) s.textContent = this.score.toString().padStart(6, '0');
+        if (hs) hs.textContent = this.highScore.toString().padStart(6, '0');
         if (l) l.textContent = '♥'.repeat(Math.max(0, this.lives));
+        
         if (this.waveManager) {
             if (lvl) lvl.textContent = (this.waveManager.levelIndex + 1).toString().padStart(2, '0');
             if (wv) wv.textContent = (this.waveManager.waveIndex + 1).toString().padStart(2, '0');
@@ -294,7 +292,6 @@ class Game {
     getDist(o1, o2) { return Math.sqrt(Math.pow(o1.x-o2.x, 2) + Math.pow(o1.y-o2.y, 2)); }
 
     draw() {
-        // 🛡️ BLOQUEO VISUAL: Si el juego terminó, limpiamos canvas y abortamos dibujo.
         if (!this.isRunning && !this.isPaused) {
             this.ctx.fillStyle = '#0f1210';
             this.ctx.fillRect(0, 0, this.width, this.height);
@@ -304,11 +301,9 @@ class Game {
         this.ctx.fillStyle = '#0f1210';
         this.ctx.fillRect(0, 0, this.width, this.height);
 
-        // Fondo
         this.ctx.fillStyle = 'rgba(255, 184, 0, 0.6)';
         this.stars.forEach(s => this.ctx.fillRect(s.x, s.y, s.size, s.size * 2));
 
-        // Entidades
         this.powerUps.forEach(pu => pu.draw(this.ctx));
         this.playerBullets.forEach(b => b.draw(this.ctx));
         this.enemyBullets.forEach(b => b.draw(this.ctx));
@@ -327,8 +322,8 @@ class Game {
     }
 
     gameOver(victory) {
-        this.isRunning = false; // Detiene la lógica de update
-        this.stop();            // Detiene el requestAnimationFrame
+        this.isRunning = false;
+        this.stop();
 
         const screenId = victory ? 'screen-victory' : 'screen-game-over';
         const scoreId = victory ? 'final-score-win' : 'final-score-lost';
@@ -336,11 +331,9 @@ class Game {
         const scoreDisplay = document.getElementById(scoreId);
         if (scoreDisplay) scoreDisplay.textContent = this.score.toString().padStart(6, '0');
         
-        // El CSS se encarga de que sea una pantalla sólida
         const overlay = document.getElementById(screenId);
         if (overlay) overlay.classList.remove('hidden');
 
-        // Limpieza final de pantalla para evitar "fantasmas"
         this.ctx.fillStyle = '#0f1210';
         this.ctx.fillRect(0, 0, this.width, this.height);
     }
