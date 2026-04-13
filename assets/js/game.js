@@ -1,6 +1,6 @@
 /**
  * ARCHIVO: assets/js/game.js
- * FASE: 13 (Versión Final - Estabilidad Total)
+ * FASE: 15 (Game Feel - Impactos y Destrucción)
  * PROYECTO: HELLFRAME - I.T. Pachuca
  */
 
@@ -160,12 +160,19 @@ class Game {
                         e.markedForDeletion = true;
                         this.addScore(e.scoreValue);
                         this.checkDrop(e);
-                        if (e.isBoss) setTimeout(() => this.gameOver(true), 1000);
+                        
+                        if (e.isBoss) {
+                            // 🚩 GAME FEEL: MUERTE DEL BOSS (Láser)
+                            if (window.triggerShake) window.triggerShake(25, 1200);
+                            if (window.triggerFlash) window.triggerFlash('white', 600);
+                            setTimeout(() => this.gameOver(true), 1000);
+                        }
                     }
                 }
             });
         }
 
+        // --- 🔫 LÓGICA DE PROYECTILES ---
         this.enemies.forEach(e => {
             this.playerBullets.forEach(b => {
                 if (this.checkCollision(b, e)) {
@@ -175,12 +182,19 @@ class Game {
                         e.markedForDeletion = true;
                         this.addScore(e.scoreValue);
                         this.checkDrop(e);
-                        if (e.isBoss) setTimeout(() => this.gameOver(true), 1000);
+                        
+                        if (e.isBoss) {
+                            // 🚩 GAME FEEL: MUERTE DEL BOSS (Proyectil)
+                            if (window.triggerShake) window.triggerShake(25, 1200);
+                            if (window.triggerFlash) window.triggerFlash('white', 600);
+                            setTimeout(() => this.gameOver(true), 1000);
+                        }
                     }
                 }
             });
         });
 
+        // --- 💥 LÓGICA DE DAÑO AL JUGADOR ---
         this.enemies.forEach(e => {
             if (this.getDist(this.player, e) < 40) this.handlePlayerHit(e);
         });
@@ -223,15 +237,28 @@ class Game {
         if (type === 'bomb') {
             this.enemies.forEach(e => { if(!e.isBoss){ e.hp = 0; e.markedForDeletion = true; this.addScore(e.scoreValue); } });
             this.enemyBullets = [];
+            // Opcional: Shake para la bomba!
+            if (window.triggerShake) window.triggerShake(10, 400); 
         }
     }
 
     handlePlayerHit(offender) {
         if (this.godMode) { offender.markedForDeletion = true; return; }
         offender.markedForDeletion = true;
-        if (this.player.hasShield) { this.player.takeDamage(true); } 
+        
+        if (this.player.hasShield) { 
+            this.player.takeDamage(true); 
+            // 🚩 GAME FEEL: Rotura de escudo (temblor leve)
+            if (window.triggerShake) window.triggerShake(5, 100);
+        } 
         else {
-            this.lives--; this.player.takeDamage(false);
+            this.lives--; 
+            this.player.takeDamage(false);
+
+            // 🚩 GAME FEEL: PÉRDIDA DE VIDA (Temblor severo y destello rojo)
+            if (window.triggerShake) window.triggerShake(12, 300);
+            if (window.triggerFlash) window.triggerFlash('red', 150);
+
             if (this.lives <= 0) this.gameOver(false);
         }
         this.updateUI();

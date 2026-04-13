@@ -28,6 +28,9 @@ class Player {
         this.shieldBreakTimer = 0;
         this.shieldBreakDuration = 300;
 
+        // Dentro de tu método shoot() o disparar() de la clase Player
+if (window.triggerShake) window.triggerShake(2, 50); // Intensidad baja (2), muy rápido (50ms)
+
         // Láser
         this.isLaserActive = false;
         this.laserTimer = 0;

@@ -60,6 +60,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // Exportar para que WaveManager pueda llamar a la música del Boss
     window.switchMusic = playTrack;
 
+    // ==========================================
+// ⚡ SISTEMA DE GAME FEEL (SCREEN SHAKE Y FLASH)
+// ==========================================
+
+// 1. Temblor de Cámara
+window.triggerShake = (intensity = 5, duration = 200) => {
+    const canvas = document.getElementById('gameCanvas');
+    let startTime = performance.now();
+
+    const shakeLoop = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        if (elapsed < duration) {
+            // Genera coordenadas aleatorias basadas en la intensidad
+            const dx = (Math.random() - 0.5) * intensity * 2;
+            const dy = (Math.random() - 0.5) * intensity * 2;
+            canvas.style.transform = `translate(${dx}px, ${dy}px)`;
+            requestAnimationFrame(shakeLoop);
+        } else {
+            // Reinicia la posición al terminar
+            canvas.style.transform = 'translate(0px, 0px)'; 
+        }
+    };
+    requestAnimationFrame(shakeLoop);
+};
+
+// 2. Destello Visual (Hit Flash)
+window.triggerFlash = (colorType = 'red', duration = 150) => {
+    const canvas = document.getElementById('gameCanvas');
+    
+    // Usamos filtros CSS nativos para un rendimiento óptimo
+    if (colorType === 'red') {
+        canvas.style.filter = 'brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(5)';
+    } else if (colorType === 'white') {
+        canvas.style.filter = 'brightness(5) contrast(1.2)';
+    }
+
+    setTimeout(() => {
+        canvas.style.filter = 'none';
+    }, duration);
+};
+
     // 5. INICIALIZACIÓN DEL MOTOR
     const game = new Game('gameCanvas');
 
