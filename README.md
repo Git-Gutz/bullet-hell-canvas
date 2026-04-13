@@ -37,10 +37,15 @@ El operador debe purgar el núcleo de **10 incursiones de virus autónomos**, cu
 
 Usa los siguientes comandos para operar la unidad de defensa:
 
+# 🕹️ PROTOCOLO DE MANIOBRA
+
+Usa los siguientes comandos para operar la unidad de defensa:
+
 | Acción | Comando |
 |--------|---------|
-| Navegación | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd> |
-| Fuego de Supresión | <kbd>Espacio</kbd> |
+| Navegación | Cursor / Touch Input |
+| Fuego de Supresión | Automático |
+| Láser Especial | <kbd>Espacio</kbd> / Botón HUD (Móvil) |
 | Gestión de Energía | Panel Lateral de Terminal |
 
 ---
