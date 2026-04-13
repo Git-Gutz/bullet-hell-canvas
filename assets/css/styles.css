@@ -159,6 +159,8 @@ body {
     background: var(--vcr-panel) !important;
     border: 4px solid var(--vcr-border) !important;
     box-shadow: 6px 6px 0px rgba(0,0,0,0.4);
+    .card-header h4 {
+    color: #ffffff !important;}
 }
 
 #ui-lives {
