@@ -131,7 +131,10 @@ class Player {
         ctx.save();
         ctx.translate(this.x, this.y);
         
-        let img = Assets && Assets.images ? Assets.images.playerShip : null;
+// FORMA SEGURA (no crashea aunque Assets no exista aún)
+let img = (typeof window.Assets !== 'undefined' && window.Assets.images) 
+          ? window.Assets.images.playerShip // <-- ESTA PALABRA debe ser igual a la del main.js
+          : null;
         if (img && img.complete) {
             ctx.drawImage(img, -this.width / 2, -this.height / 2, this.width, this.height);
         } else {

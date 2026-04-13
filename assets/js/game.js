@@ -1,3 +1,9 @@
+/**
+ * ARCHIVO: assets/js/game.js
+ * FASE: 11 (Coordinación de Hordas, God Mode y Anti-Encimamiento)
+ * PROYECTO: Automata Hell - I.T. Pachuca
+ */
+
 class Game {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
@@ -10,17 +16,25 @@ class Game {
 
         this.input = new InputHandler(this.canvas);
         this.player = new Player(this); 
+        
+        // --- ESTADO Y MODO DE PRUEBAS ---
         this.lives = 3;
         this.score = 0;
         this.highScore = localStorage.getItem('automata_highscore') || 0;
         
+        /** * 🛡️ MODO DIOS (GOD MODE)
+         * Cambia a 'false' para activar la dificultad real del juego.
+         */
+        this.godMode = true; 
+
+        // --- POOLS DE ENTIDADES ---
         this.playerBullets = [];
         this.enemyBullets = [];
         this.enemies = []; 
         this.powerUps = []; 
 
-        this.enemyTimer = 0;
-        this.enemyInterval = 1500; 
+        // --- SISTEMA DE OLEADAS ---
+        this.waveManager = new WaveManager(this);
 
         this.stars = [];
         this.initBackground();
@@ -41,19 +55,29 @@ class Game {
     start() {
         if (!this.isRunning) {
             this.isRunning = true;
+            this.isPaused = false;
+            
+            // REGLA DE ORO 4: Solo inicia si los assets están en memoria
+            if (window.Assets && window.Assets.isLoaded) {
+                this.waveManager.startLevel(); 
+            } else {
+                console.error("ERROR CRÍTICO: Assets no cargados. Abortando inicio.");
+                return;
+            }
+            
             requestAnimationFrame((t) => this.loop(t));
         }
     }
-togglePause() {
+
+    togglePause() {
         this.isPaused = !this.isPaused;
     }
 
     stop() {
         this.isRunning = false;
     }
-    // --------------------------------------------
-    
-loop(timestamp) {
+
+    loop(timestamp) {
         if (!this.isRunning) return;
         let deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
@@ -65,44 +89,48 @@ loop(timestamp) {
     update(deltaTime) {
         if (this.isPaused) return;
 
+        // 1. Fondo (Parallax)
         this.stars.forEach(s => {
             s.y += s.speed;
             if (s.y > this.height) { s.y = 0; s.x = Math.random() * this.width; }
         });
 
+        // 2. Control de Oleadas
+        this.waveManager.update(deltaTime);
+
+        // 3. Jugador y Proyectiles
         this.player.update(this.input, deltaTime);
         this.playerBullets.forEach(b => b.update());
         this.enemyBullets.forEach(b => b.update());
-        this.playerBullets = this.playerBullets.filter(b => !b.markedForDeletion);
-        this.enemyBullets = this.enemyBullets.filter(b => !b.markedForDeletion);
-
+        
+        // 4. Power-Ups
         this.powerUps.forEach(pu => {
             pu.update();
-            const dx = this.player.x - pu.x;
-            const dy = this.player.y - pu.y;
-            if (Math.sqrt(dx*dx + dy*dy) < 40) {
+            if (this.getDist(this.player, pu) < 40) {
                 this.applyPowerUp(pu.type);
                 pu.markedForDeletion = true;
             }
         });
-        this.powerUps = this.powerUps.filter(pu => !pu.markedForDeletion);
 
-        if (this.enemyTimer > this.enemyInterval) {
-            this.spawnRandomEnemy();
-            this.enemyTimer = 0;
-        } else {
-            this.enemyTimer += deltaTime;
-        }
-
+        // 5. Enemigos Autónomos
         this.enemies.forEach(e => e.update(deltaTime));
 
+        // 6. Colisiones y Resolución de Físicas
+        this.handleCollisions();
+        this.resolveEnemyCollisions(); // <--- SISTEMA ANTI-ENCIMAMIENTO APLICADO AQUÍ
+
+        // 7. Garbage Collection (Filtro de borrado)
+        this.playerBullets = this.playerBullets.filter(b => !b.markedForDeletion);
+        this.enemyBullets = this.enemyBullets.filter(b => !b.markedForDeletion);
+        this.powerUps = this.powerUps.filter(pu => !pu.markedForDeletion);
+        this.enemies = this.enemies.filter(e => !e.markedForDeletion);
+    }
+
+    handleCollisions() {
         // Colisiones Láser
         if (this.player.isLaserActive) {
             const lLeft = this.player.x - 15;
             const lRight = this.player.x + 15;
-            this.enemyBullets.forEach(b => {
-                if (b.x > lLeft && b.x < lRight && b.y < this.player.y) b.markedForDeletion = true;
-            });
             this.enemies.forEach(e => {
                 if (e.x + e.width/2 > lLeft && e.x - e.width/2 < lRight && e.y < this.player.y) {
                     e.hp -= 0.5;
@@ -120,7 +148,7 @@ loop(timestamp) {
                 if (this.checkCollision(b, e)) {
                     b.markedForDeletion = true;
                     e.hp--;
-                    if (e.hp <= 0) {
+                    if (e.hp <= 0 && !e.markedForDeletion) {
                         e.markedForDeletion = true;
                         this.addScore(e.scoreValue);
                         this.checkDrop(e);
@@ -129,38 +157,75 @@ loop(timestamp) {
             });
         });
 
-        // Daño Jugador
-        if (!this.player.isInvulnerable) {
-            this.enemies.forEach(e => {
-                if (this.getDist(this.player, e) < 40) this.handlePlayerHit(e);
-            });
-            this.enemyBullets.forEach(b => {
-                if (this.getDist(this.player, b) < 30) this.handlePlayerHit(b);
-            });
-        }
-
-        this.enemies = this.enemies.filter(e => !e.markedForDeletion);
+        // Daño al Jugador (Afectado por God Mode)
+        this.enemies.forEach(e => {
+            if (this.getDist(this.player, e) < 40) this.handlePlayerHit(e);
+        });
+        this.enemyBullets.forEach(b => {
+            if (this.getDist(this.player, b) < 30) this.handlePlayerHit(b);
+        });
     }
 
-    spawnRandomEnemy() {
-        const types = Object.keys(EnemyConfigs);
-        const type = types[Math.floor(Math.random() * types.length)];
-        let side = Math.floor(Math.random() * 3); 
-        let sx, sy, vx, vy;
-        let speed = EnemyConfigs[type].speed;
+    // --- NUEVO: SISTEMA ANTI-ENCIMAMIENTO ---
+    // --- SISTEMA ANTI-ENCIMAMIENTO (PULIDO) ---
+    resolveEnemyCollisions() {
+        for (let i = 0; i < this.enemies.length; i++) {
+            for (let j = i + 1; j < this.enemies.length; j++) {
+                const e1 = this.enemies[i];
+                const e2 = this.enemies[j];
 
-        if (side === 0) { sx = Math.random() * (this.width - 100) + 50; sy = -50; vx = 0; vy = speed; }
-        else if (side === 1) { sx = -50; sy = Math.random() * (this.height * 0.4); vx = speed * 0.8; vy = speed * 0.5; }
-        else { sx = this.width + 50; sy = Math.random() * (this.height * 0.4); vx = -speed * 0.8; vy = speed * 0.5; }
+                const dx = e2.x - e1.x;
+                const dy = e2.y - e1.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
 
-        this.enemies.push(new Enemy(this, type, sx, sy, vx, vy));
+                // 1. RADIO FANTASMA: Usamos solo el 45% de su tamaño (antes 80%)
+                // Así solo se empujan si sus "núcleos" se tocan, permitiendo que las alas se crucen visualmente.
+                const minDistance = (e1.width / 2 + e2.width / 2) * 0.45;
+
+                if (distance < minDistance && distance > 0) {
+                    const overlap = minDistance - distance;
+                    const nx = dx / distance;
+                    const ny = dy / distance;
+
+                    // 2. EMPUJE SUAVE: Reducimos drásticamente la fuerza (de 0.5 a 0.05)
+                    // Esto crea un efecto de "deslizamiento" fluido en lugar de un rebote violento.
+                    const pushForce = 0.05; 
+                    const pushX = nx * (overlap * pushForce);
+                    const pushY = ny * (overlap * pushForce);
+
+                    // 3. SISTEMA DE MASA: Un Grunt no puede empujar a un Elite/Boss
+                    const e1IsHeavy = e1.type === 'elite' || e1.isBoss;
+                    const e2IsHeavy = e2.type === 'elite' || e2.isBoss;
+
+                    // Aplicar empuje al enemigo 1 (solo si no es pesado)
+                    if (!e1IsHeavy) {
+                        if (e1.dynamicCenterX !== undefined) {
+                            e1.dynamicCenterX -= pushX;
+                        } else {
+                            e1.x -= pushX;
+                        }
+                        e1.y -= pushY * 0.1; // Apenas tocamos el eje Y para no frenarlos
+                    }
+
+                    // Aplicar empuje al enemigo 2 (solo si no es pesado)
+                    if (!e2IsHeavy) {
+                        if (e2.dynamicCenterX !== undefined) {
+                            e2.dynamicCenterX += pushX;
+                        } else {
+                            e2.x += pushX;
+                        }
+                        e2.y += pushY * 0.1;
+                    }
+                }
+            }
+        }
     }
 
     checkDrop(enemy) {
         const roll = Math.random();
-        if (roll < 0.25) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'multiShot'));
-        else if (roll < 0.50) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'shield'));
-        else if (roll < 0.60) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'bomb'));
+        if (roll < 0.20) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'multiShot'));
+        else if (roll < 0.35) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'shield'));
+        else if (roll < 0.45) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'bomb'));
     }
 
     applyPowerUp(type) {
@@ -173,12 +238,25 @@ loop(timestamp) {
     }
 
     handlePlayerHit(offender) {
+        // --- LÓGICA DE PRUEBAS: INMORTALIDAD ---
+        if (this.godMode) {
+            offender.markedForDeletion = true; 
+            console.log("God Mode: Impacto neutralizado.");
+            return; 
+        }
+
+        // --- LÓGICA DE JUEGO REAL ---
         offender.markedForDeletion = true;
-        if (this.player.hasShield) this.player.takeDamage(true);
-        else {
+        if (this.player.hasShield) {
+            this.player.takeDamage(true); 
+        } else {
             this.lives--;
-            this.player.takeDamage(false);
-            if (this.lives <= 0) { this.stop(); alert("GAME OVER"); location.reload(); }
+            this.player.takeDamage(false); 
+            if (this.lives <= 0) {
+                this.stop();
+                alert("SISTEMA COLAPSADO - GAME OVER");
+                location.reload();
+            }
         }
         this.updateUI();
     }
@@ -191,14 +269,26 @@ loop(timestamp) {
         }
         this.updateUI();
     }
-
-    updateUI() {
+updateUI() {
         const s = document.getElementById('ui-score');
         const h = document.getElementById('ui-highscore');
         const l = document.getElementById('ui-lives');
+        
+        // --- NUEVOS ELEMENTOS DEL HUD ---
+        const lvl = document.getElementById('ui-level');
+        const wv = document.getElementById('ui-wave');
+
         if (s) s.textContent = this.score.toString().padStart(6, '0');
         if (h) h.textContent = Number(this.highScore).toString().padStart(6, '0');
         if (l) l.textContent = '♥'.repeat(this.lives);
+
+        // Actualizamos el Nivel y la Horda dinámicamente
+        if (this.waveManager) {
+            if (lvl) lvl.textContent = (this.waveManager.levelIndex + 1).toString().padStart(2, '0');
+            
+            // Para la horda, también sumamos 1
+            if (wv) wv.textContent = (this.waveManager.waveIndex + 1).toString().padStart(2, '0');
+        }
     }
 
     checkCollision(r, c) {
@@ -211,13 +301,21 @@ loop(timestamp) {
     draw() {
         this.ctx.fillStyle = '#0f1210';
         this.ctx.fillRect(0, 0, this.width, this.height);
+
+        // Estrellas
         this.ctx.fillStyle = 'rgba(255, 184, 0, 0.6)';
         this.stars.forEach(s => this.ctx.fillRect(s.x, s.y, s.size, s.size * 2));
+
+        // Entidades
         this.powerUps.forEach(pu => pu.draw(this.ctx));
         this.playerBullets.forEach(b => b.draw(this.ctx));
         this.enemyBullets.forEach(b => b.draw(this.ctx));
         this.enemies.forEach(e => e.draw(this.ctx));
         this.player.draw(this.ctx);
+
+        // UI de Oleadas
+        this.waveManager.draw(this.ctx);
+
         if (this.isPaused) {
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             this.ctx.fillRect(0, 0, this.width, this.height);

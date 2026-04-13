@@ -302,4 +302,27 @@ footer {
     .game-column, .info-column {
         height: 100%; 
     }
+    .level-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-level-select {
+    background: #0f1210;
+    color: #3b8e88;
+    border: 1px solid #3b8e88;
+    padding: 10px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-level-select:hover {
+    background: #3b8e88;
+    color: #0f1210;
+    box-shadow: 0 0 10px #3b8e88;
+}
 }

@@ -1,35 +1,37 @@
-// Objeto global para almacenar nuestras imágenes cargadas
-const Assets = {
-    images: {},
+// assets/js/utils.js
 
-    // Función para precargar imágenes
+// No uses 'const', simplemente usa el objeto que ya vive en window
+window.Assets = {
+    images: {},
+    isLoaded: false,
+
     loadImages: function(imageSources, callback) {
         let loadedCount = 0;
-        let totalCount = Object.keys(imageSources).length;
+        let keys = Object.keys(imageSources);
+        let totalCount = keys.length;
 
-        // Si no hay imágenes para cargar, ejecuta el callback inmediatamente
         if (totalCount === 0) {
+            this.isLoaded = true; // Importante marcarlo como listo
             callback();
             return;
         }
 
-        for (let key in imageSources) {
+        keys.forEach(key => {
             let img = new Image();
             img.onload = () => {
                 loadedCount++;
-                // Cuando todas las imágenes terminen de cargar, avisa al juego
                 if (loadedCount === totalCount) {
+                    window.Assets.isLoaded = true; // Marcamos éxito total
                     callback();
                 }
             };
-            // Si la ruta está mal, evitamos que el juego se quede congelado
             img.onerror = () => {
-                console.error(`Error cargando imagen: ${imageSources[key]}`);
+                console.error(`ERROR 404: No se encontró la imagen en: ${imageSources[key]}`);
                 loadedCount++;
                 if (loadedCount === totalCount) callback();
             };
             img.src = imageSources[key];
-            this.images[key] = img;
-        }
+            this.images[key] = img; // Se guardan en window.Assets.images
+        });
     }
 };
