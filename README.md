@@ -33,9 +33,6 @@ El operador debe purgar el núcleo de **10 incursiones de virus autónomos**, cu
 
 ---
 
-# 🕹️ PROTOCOLO DE MANIOBRA
-
-Usa los siguientes comandos para operar la unidad de defensa:
 
 # 🕹️ PROTOCOLO DE MANIOBRA
 
