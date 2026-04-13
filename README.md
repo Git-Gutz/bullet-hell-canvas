@@ -1,65 +1,62 @@
-🚀 HELLFRAME - OS
-Terminal de Combate Táctico Retro-Futurista
-Proyecto de Ingeniería en Sistemas Computacionales | I.T. Pachuca
+<div align="center">
 
-🛰️ Resumen del Proyecto
-HELLFRAME es un videojuego de disparos en 2D (SHMUP) desarrollado bajo el paradigma de programación orientada a objetos en Vanilla JavaScript. El proyecto rinde homenaje a la estética de las terminales industriales de los años 90 y a la interfaz de usuario de Zenless Zone Zero, integrando efectos de post-procesamiento analógico y una arquitectura de audio adaptativa.
+# 💀 HELLFRAME  
+## OS[ TERMINAL DE DEFENSA TÁCTICA v1.0 ]
 
-El jugador asume el rol de un operador de terminal encargado de neutralizar 10 oleadas de incursiones enemigas, culminando en la supresión del Automata Core (Jefe Final).
+**Proyecto de Ingeniería en Sistemas Computacionales**  
+**Instituto Tecnológico de Pachuca**
 
-🛠️ Stack Tecnológico
-Lenguaje: JavaScript (ES6+) - Motor desarrollado desde cero sin frameworks externos.
+*"En el corazón de la terminal, solo queda el código y el acero."*
 
-Renderizado: HTML5 Canvas API para gráficos de alto rendimiento a 60 FPS.
+</div>
 
-Estilos: CSS3 Avanzado (Variables dinámicas, Grid, Flexbox y Filtros de post-procesamiento).
+---
 
-Persistencia: Web Storage API (LocalStorage) para la gestión de récords locales.
+# 🛰️ REPORTE DE SISTEMA
 
-Audio: Lógica de reproducción síncrona con bypass de las políticas de Autoplay del navegador.
+**HELLFRAME** es un simulador de combate balístico en 2D desarrollado íntegramente en **Vanilla JavaScript**.  
+El sistema emula una terminal de control industrial de los años 90, integrando post-procesamiento visual CRT y mecánicas de audio adaptativo.
 
-🕹️ Características de Ingeniería
-Simulación CRT: Capa de post-procesamiento con scanlines (líneas de escaneo) y viñeteado dinámico para una experiencia visual de tubo de rayos catódicos.
+El operador debe purgar el núcleo de **10 incursiones de virus autónomos**, culminando en la supresión del **Automata Core (Jefe Final)**.
 
-Game Feel (Juice): Implementación de Screen Shake (temblor de cámara) mediante transformaciones CSS y Hit Flashing para retroalimentación táctil de impactos.
+---
 
-Audio Adaptativo: Sistema de gestión de pistas basado en estados que transiciona dinámicamente entre el Menú (Future Funk), Combate, Boss y Victoria.
+# 🛠️ ESPECIFICACIONES TÉCNICAS
 
-WaveManager Inteligente: Sistema de gestión de hordas que controla intervalos de spawn, tipos de enemigos y eventos de jefe de forma secuencial.
+| Módulo | Tecnología | Implementación |
+|--------|------------|----------------|
+| Núcleo de Renderizado | HTML5 Canvas | 60 FPS estables con POO |
+| Arquitectura de Audio | Web Audio API | Bypass de Autoplay y Mix adaptativo |
+| Post-procesamiento | CSS3 / Filters | Scanlines, Viñeteado y Glitch FX |
+| Memoria Persistente | LocalStorage | Guardado de High Score local |
+| Físicas de Impacto | JS Custom Engine | Screen Shake y Hit Flashing |
 
-Persistencia de High Score: Guardado automático de la puntuación máxima del usuario en la memoria persistente del cliente.
+---
 
-🎮 Operación de la Terminal
-Movimiento: Teclas W, A, S, D o Flechas de Dirección.
+# 🕹️ PROTOCOLO DE MANIOBRA
 
-Disparo: Barra Espaciadora (Space).
+Usa los siguientes comandos para operar la unidad de defensa:
 
-Interfaz: Panel lateral interactivo con estados de Pausa, Reinicio y Selección de Nivel.
+| Acción | Comando |
+|--------|---------|
+| Navegación | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd> |
+| Fuego de Supresión | <kbd>Espacio</kbd> |
+| Gestión de Energía | Panel Lateral de Terminal |
 
-📂 Arquitectura del Directorio
-Bash
-HELLFRAME/
-├── assets/
-│   ├── css/        
-│   │   └── styles.css      # Estilos de terminal y paleta "Random Play"
-│   ├── js/         
-│   │   ├── entities/       # Clases: Player, Enemy, Boss, Bullets, PowerUps
-│   │   ├── core/           # WaveManager y Configs (Niveles/Enemigos)
-│   │   └── main.js         # Punto de entrada y gestión de Audio/UI
-│   ├── audio/              # Soundtrack y efectos atmosféricos
-│   └── images/             # Spritesheets y fondos estáticos
-├── index.html              # Estructura de la terminal y CRT Overlay
-└── README.md               # Documentación técnica
-👷 Desarrollador
-Leonardo * Institución: Instituto Tecnológico de Pachuca
+---
 
-Carrera: Ingeniería en Sistemas Computacionales
+# 📁 ESTRUCTURA DE LA TERMINAL
 
-Fecha: Abril, 2026
-
-🔧 Instrucciones de Implementación
-Descargue el repositorio completo.
-
-Ejecute el archivo index.html en un navegador web (Chrome o Edge recomendados).
-
-Nota sobre Audio: Debido a las políticas de seguridad del navegador, se requiere una interacción inicial (clic en cualquier parte de la terminal) para inicializar el núcleo de audio de HELLFRAME.
+```bash
+📂 HELLFRAME
+ ┣ 📂 assets
+ ┃ ┣ 📂 css
+ ┃ ┃ ┗ 📜 styles.css      # Filtros CRT y Paleta "Random Play"
+ ┃ ┣ 📂 js
+ ┃ ┃ ┣ 📂 entities        # Jugador, Enemigos, Boss y Balas
+ ┃ ┃ ┣ 📂 core            # WaveManager y Configuración de Niveles
+ ┃ ┃ ┗ 📜 main.js         # Orquestador de Audio y UI
+ ┃ ┣ 📂 audio             # Soundtrack Future Funk / Industrial
+ ┃ ┗ 📂 images            # Visual Assets y Backgrounds
+ ┣ 📜 index.html          # Interfaz de Usuario y Canvas
+ ┗ 📜 README.md           # Documentación Técnica
