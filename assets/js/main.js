@@ -1,12 +1,12 @@
 /**
  * ARCHIVO: assets/js/main.js
- * FASE: 13 (Game Flow, Menú HELLFRAME y Gestión de Audio)
+ * FASE: 14 (Gestión Atmosférica de Audio y Navegación de Terminal - FINAL)
  * PROYECTO: HELLFRAME - I.T. Pachuca
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // 1. DEFINICIÓN DE ASSETS
+
+    // 1. DEFINICIÓN DE ASSETS (Rutas sincronizadas)
     const imageSources = {
         playerShip: './assets/images/player/playerShip1_blue.png',
         grunt: './assets/images/enemies/grunt.png',
@@ -16,56 +16,110 @@ document.addEventListener('DOMContentLoaded', () => {
         drone: './assets/images/powerups/drone_support.png'
     };
 
-    // 2. ELEMENTOS DE LA INTERFAZ (UI)
+    // 2. ELEMENTOS DE AUDIO (Música Atmosférica)
+    const musicTracks = {
+        menu: document.getElementById('music-menu'),
+        combat: document.getElementById('music-combat'),
+        boss: document.getElementById('music-boss'),
+        victory: document.getElementById('music-victory') // 🚩 NUEVA LÍNEA AÑADIDA
+    };
+
+    // 3. ELEMENTOS DE LA INTERFAZ (UI)
     const startScreen = document.getElementById('screen-start');
     const btnStartGame = document.getElementById('btn-start-game');
     const btnAudio = document.getElementById('btn-toggle-audio');
     const audioStatusText = document.getElementById('audio-status');
-    const bgMusic = document.getElementById('bg-music');
 
-    // Botones de la Sidebar
+    // Botones de la Sidebar (Panel Lateral)
     const btnPause = document.getElementById('btn-pause');
     const btnRestart = document.getElementById('btn-restart');
-    const btnToMenu = document.getElementById('btn-to-menu'); // Nuevo botón
+    const btnToMenu = document.getElementById('btn-to-menu');
     const levelContainer = document.getElementById('level-buttons-container');
 
-    // 3. INICIALIZACIÓN DEL MOTOR
+    // 4. GESTIÓN DE AUDIO DINÁMICO
+    let isGlobalMuted = false;
+
+    const playTrack = (trackKey) => {
+        // Detener todas las pistas antes de cambiar
+        Object.values(musicTracks).forEach(track => {
+            if (track) {
+                track.pause();
+                track.currentTime = 0;
+            }
+        });
+
+        const selectedTrack = musicTracks[trackKey];
+        if (selectedTrack) {
+            selectedTrack.muted = isGlobalMuted;
+            selectedTrack.play().catch(() => {
+                // Silenciamos la advertencia normal del navegador para mantener la consola limpia
+            });
+        }
+    };
+
+    // Exportar para que WaveManager pueda llamar a la música del Boss
+    window.switchMusic = playTrack;
+
+    // 5. INICIALIZACIÓN DEL MOTOR
     const game = new Game('gameCanvas');
 
     if (btnStartGame) {
-        btnStartGame.disabled = true;
-        btnStartGame.textContent = 'CARGANDO_SISTEMA...';
+        btnStartGame.textContent = 'CARGANDO_NÚCLEO...';
     }
 
-    // 4. PRECARGA DE IMÁGENES
+    // --- 🎧 EL TRUCO DEL CLIC INVISIBLE (Bypass de Autoplay) ---
+    let audioDesbloqueado = false;
+    
+    const romperBloqueoDeAudio = () => {
+        if (!audioDesbloqueado) {
+            audioDesbloqueado = true;
+            
+            // Si el jugador aún no ha entrado a la partida, ponemos la música del menú
+            if (!game.isRunning) {
+                playTrack('menu');
+            }
+            
+            // Destruimos el "escucha" para que no consuma memoria el resto del juego
+            document.removeEventListener('click', romperBloqueoDeAudio);
+            document.removeEventListener('keydown', romperBloqueoDeAudio);
+            console.log(" [SISTEMA] Bloqueo de navegador superado. Audio en línea.");
+        }
+    };
+
+    // Escuchamos el primer clic o tecla en absolutamente cualquier parte de la página
+    document.addEventListener('click', romperBloqueoDeAudio);
+    document.addEventListener('keydown', romperBloqueoDeAudio);
+
+
+    // 6. PRECARGA Y FLUJO DE JUEGO
     window.Assets.loadImages(imageSources, () => {
-        console.log(" [SISTEMA] Assets cargados. HELLFRAME listo.");
-        
+        console.log(" [SISTEMA] Assets en memoria. HELLFRAME Online.");
+
         if (btnStartGame) {
-            btnStartGame.disabled = false;
             btnStartGame.textContent = 'INICIAR SECUENCIA';
         }
 
-        // Dibujar frame inicial (Splash screen)
+        // Intentamos reproducir el menú por si el navegador lo permite
+        playTrack('menu');
         game.draw();
 
-        // --- LÓGICA DE INICIO (MENÚ CENTRAL) ---
+        // --- INICIAR JUEGO ---
         btnStartGame.addEventListener('click', () => {
-            startScreen.classList.add('hidden'); 
-            btnPause.disabled = false;
+            startScreen.classList.add('hidden');
             
-            if (bgMusic) {
-                bgMusic.play().catch(() => console.warn("Interacción requerida para audio."));
-            }
-            
+            playTrack('combat'); // Cambio a música de combate
             game.start();
         });
 
-        // --- LÓGICA DE PAUSA (SIDEBAR) ---
+        // --- PAUSA (SIDEBAR) ---
         btnPause.addEventListener('click', () => {
+            // Si el juego no está corriendo, el botón hace "clic" visualmente
+            // pero salimos de la función sin hacer nada en el motor.
             if (!game.isRunning) return;
+
             game.togglePause();
-            
+
+            // Solo cambiamos el texto/color si el juego SI está en marcha
             btnPause.textContent = game.isPaused ? 'REANUDAR' : 'PAUSA';
             if (game.isPaused) {
                 btnPause.classList.replace('btn-arcade-warning', 'btn-arcade-success');
@@ -74,64 +128,67 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // --- LÓGICA DE REINICIAR FASE (SIDEBAR - Sin notificaciones) ---
+        // --- REINICIAR FASE (Instantáneo) ---
         btnRestart.addEventListener('click', () => {
-            // Ocultamos overlays de fin de juego por si se reinicia desde ahí
             document.getElementById('screen-victory').classList.add('hidden');
             document.getElementById('screen-game-over').classList.add('hidden');
-            
-            // Reinicio instantáneo sin confirm() molesto
+
+            playTrack('combat'); // Asegurar que suena la música de combate al reiniciar
             game.resetLevel();
-            
-            // Resetear estado del botón de pausa
+
             btnPause.textContent = 'PAUSA';
             btnPause.classList.replace('btn-arcade-success', 'btn-arcade-warning');
         });
 
-        // --- LÓGICA DE VOLVER AL MENÚ (NUEVO) ---
+        // --- VOLVER AL MENÚ PRINCIPAL ---
         if (btnToMenu) {
             btnToMenu.addEventListener('click', () => {
-                // Detenemos lógica y limpiamos entidades
                 game.returnToMenu();
-                
-                // Limpiamos cualquier overlay visible
+
                 document.getElementById('screen-victory').classList.add('hidden');
                 document.getElementById('screen-game-over').classList.add('hidden');
-                
-                // Mostramos la pantalla de inicio sólida
                 startScreen.classList.remove('hidden');
-                
-                // Deshabilitamos controles laterales
-                btnPause.disabled = true;
+
+                // Reseteamos el texto y el color, pero dejamos vivo el botón
                 btnPause.textContent = 'PAUSA';
                 btnPause.classList.replace('btn-arcade-success', 'btn-arcade-warning');
-                
+
+                playTrack('menu');
                 console.log(" [SISTEMA] Regresando a la terminal de inicio.");
             });
         }
 
-        // --- CONTROL DE AUDIO ---
-        let isMuted = false;
+        // --- CONTROL DE AUDIO (MUTE) ---
         btnAudio.addEventListener('click', () => {
-            isMuted = !isMuted;
-            if (bgMusic) bgMusic.muted = isMuted;
-            audioStatusText.textContent = isMuted ? 'OFF' : 'ON';
-            btnAudio.style.borderColor = isMuted ? '#c94938' : '#3b8e88';
+            isGlobalMuted = !isGlobalMuted;
+            Object.values(musicTracks).forEach(track => {
+                if (track) track.muted = isGlobalMuted;
+            });
+
+            audioStatusText.textContent = isGlobalMuted ? 'OFF' : 'ON';
+            btnAudio.style.borderColor = isGlobalMuted ? '#c94938' : '#3b8e88';
         });
 
-        // --- SELECTOR DE NIVELES DINÁMICO ---
+        // --- SELECTOR DE NIVELES ---
         if (levelContainer) {
             LevelConfigs.forEach((level, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-level-select';
                 btn.textContent = `F-${index + 1}`;
-                
+
                 btn.addEventListener('click', () => {
                     if (!game.isRunning) {
                         startScreen.classList.add('hidden');
-                        btnPause.disabled = false;
-                        game.start();
+                        game.start(); 
                     }
+
+                    // Si saltamos a la última fase (Boss), activamos su música
+                    if (index === LevelConfigs.length - 1) {
+                        playTrack('boss');
+                    } else {
+                        playTrack('combat');
+                    }
+
                     game.waveManager.goToLevel(index);
                 });
                 levelContainer.appendChild(btn);

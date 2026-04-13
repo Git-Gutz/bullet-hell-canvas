@@ -30,7 +30,7 @@ html, body {
 
 body {
     background-image: url('../images/background/WPP.jpg');
-    background-size: cover; 
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -82,35 +82,32 @@ body {
     top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none;
-    z-index: 5; /* Filtro por debajo de los menús */
+    z-index: 5;
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
     background-size: 100% 4px;
     box-shadow: inset 0 0 80px rgba(0,0,0,0.5);
 }
 
 /* =========================================
-   4. MENÚS Y OVERLAYS (ESTADO SÓLIDO)
+   4. MENÚS Y OVERLAYS (HELLFRAME)
 ========================================= */
 .game-overlay {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    /* ❗ FONDO SÓLIDO: No deja ver el juego */
-    background-color: #0f1210 !important; 
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    background-color: #0f1210; 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* ❗ PRIORIDAD TOTAL: Encima de CRT y Canvas */
-    z-index: 10000 !important; 
-    opacity: 1 !important;
+    z-index: 10000; 
     transition: opacity 0.5s ease;
 }
-
 .hidden {
     display: none !important;
     pointer-events: none;
-    visibility: hidden;
 }
 
 /* Título con Efecto Glitch */
@@ -131,24 +128,6 @@ body {
     100% { transform: skew(0deg); }
 }
 
-/* Estilos de Victoria/Derrota */
-.text-win {
-    font-size: 3.5rem;
-    color: var(--crt-green) !important;
-    text-shadow: 0 0 20px rgba(92, 219, 92, 0.6), 4px 4px 0px #1a3a1a;
-    letter-spacing: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.text-lose {
-    font-size: 3.5rem;
-    color: var(--button-red) !important;
-    text-shadow: 0 0 20px rgba(201, 73, 56, 0.6);
-    margin-bottom: 20px;
-    text-align: center;
-}
-
 .btn-menu {
     background: var(--accent-teal);
     color: #fff;
@@ -161,10 +140,20 @@ body {
     transition: 0.1s;
 }
 
-.btn-menu:active { transform: translateY(4px); box-shadow: none; }
+.btn-menu:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--vcr-border);
+    font-size: 0.8rem;
+    box-shadow: none;
+}
 
 /* =========================================
-   5. PANEL LATERAL (HUD)
+   5. PANEL LATERAL (CARD Y HUD)
 ========================================= */
 .card {
     background: var(--vcr-panel) !important;
@@ -176,6 +165,7 @@ body {
     color: var(--button-red);
     font-size: 1.8rem !important;
     letter-spacing: 5px;
+    text-shadow: 0 0 10px rgba(201, 73, 56, 0.4);
 }
 
 .stat-box {
@@ -184,7 +174,7 @@ body {
     align-items: center;
     background: rgba(0,0,0,0.2);
     padding: 8px;
-    margin-bottom: 5px;
+    border-radius: 4px;
 }
 
 .instructions-box {
@@ -200,42 +190,103 @@ body {
 /* =========================================
    6. BOTONES ARCADE (SIDEBAR)
 ========================================= */
-.d-grid .btn {
-    margin-bottom: 10px;
-    padding: 15px !important;
-    font-size: 0.85rem !important;
-    width: 100%;
-    border-radius: 4px !important;
-}
 
-.btn-arcade-warning { background: var(--accent-teal); border: none; box-shadow: 0 6px 0 #21615d; }
-.btn-arcade-danger { background: var(--button-red); border: none; box-shadow: 0 6px 0 #7a2a1f; }
+/* --- BOTÓN DE PAUSA NORMAL (Verde Azulado) --- */
+.btn-arcade-warning {
+    background: var(--accent-teal);
+    border: none;
+    box-shadow: 0 6px 0 #21615d;
+    color: white;
+}
+.btn-arcade-warning:hover {
+    background: #2a6863 !important; /* Verde azulado más oscuro */
+    cursor: pointer;
+}
+.btn-arcade-warning:active { transform: translateY(4px); box-shadow: none; }
+
+/* --- BOTÓN DE REANUDAR / PAUSADO (Mostaza) --- */
+.btn-arcade-success {
+    background: var(--accent-mustard);
+    border: none;
+    box-shadow: 0 6px 0 #9c730e;
+    color: #1a1a1a;
+}
+.btn-arcade-success:hover {
+    background: #c28f16 !important; /* Mostaza más oscuro */
+    cursor: pointer;
+}
+.btn-arcade-success:active { transform: translateY(4px); box-shadow: none; } /* Añadido efecto active para consistencia */
+
+/* --- BOTÓN DE REINICIAR (Rojo) --- */
+.btn-arcade-danger {
+    background: var(--button-red);
+    border: none;
+    box-shadow: 0 6px 0 #7a2a1f;
+    color: white;
+}
+.btn-arcade-danger:hover {
+    background: #a83d2f !important; /* Rojo vintage más oscuro */
+    cursor: pointer;
+}
+.btn-arcade-danger:active { transform: translateY(4px); box-shadow: none; } /* Añadido efecto active para consistencia */
+
 
 /* BOTÓN VOLVER AL MENÚ (SIDEBAR) */
 #btn-to-menu {
-    background: #4a453f; /* Plástico neutro */
+    background: #1fa763; 
     color: var(--text-main);
     border: none;
-    box-shadow: 0 6px 0 #292724;
+    box-shadow: 0 6px 0 #164202; 
+    font-size: 0.9rem !important; 
     transition: 0.1s;
+    width: 100%; 
 }
 
-#btn-to-menu:hover { background: #5a544b; color: var(--accent-mustard); }
-#btn-to-menu:active { transform: translateY(4px); box-shadow: none; }
+#btn-to-menu:hover {
+    background: #1c9157;
+    color: var(--accent-mustard);
+}
+
+#btn-to-menu:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+/* Ajuste para que los botones de la sidebar no se peguen */
+.d-grid .btn {
+    margin-bottom: 8px; 
+    padding: 12px;     
+}
 
 /* SELECTOR DE NIVELES */
-.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
 .btn-level-select {
-    background: #0f1210; border: 1px solid var(--accent-teal);
-    color: var(--accent-teal); font-size: 0.6rem; padding: 10px 0; cursor: pointer;
+    background: #0f1210;
+    border: 1px solid var(--accent-teal);
+    color: var(--accent-teal);
+    font-size: 0.6rem;
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+.btn-level-select:hover {
+    background: var(--accent-teal);
+    color: #000;
 }
 
 /* =========================================
    7. RESPONSIVE MÓVIL
 ========================================= */
 @media (max-width: 991px) {
-    .arcade-window { max-height: 40dvh; }
-    .title-hellframe { font-size: 2.2rem; }
-    .text-win, .text-lose { font-size: 2rem; }
-    #ui-lives { font-size: 1.2rem !important; }
+    .arcade-window {
+        max-height: 40dvh;
+    }
+    .title-hellframe { 
+        font-size: 24px; /* <-- Cambia este '24px' por el tamaño que realmente necesites (ej. 2rem, 18px) */
+    }
 }

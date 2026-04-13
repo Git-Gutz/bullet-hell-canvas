@@ -99,7 +99,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button id="btn-pause" class="btn btn-arcade-warning" disabled>PAUSA</button>
+                           <button id="btn-pause" class="btn btn-arcade-warning">PAUSA</button>
                             <button id="btn-restart" class="btn btn-arcade-danger">REINICIAR</button>
                             <button id="btn-to-menu" class="btn btn-secondary">VOLVER AL MENÚ</button>
                             
@@ -114,9 +114,18 @@
         </div>
     </div>
 
-    <audio id="bg-music" loop>
-        <source src="./assets/audio/ost_main.mp3" type="audio/mpeg">
-    </audio>
+   <audio id="music-menu" loop preload="auto">
+    <source src="./assets/audio/bgm_menu.mpeg" type="audio/mpeg">
+</audio>
+<audio id="music-combat" loop preload="auto">
+    <source src="./assets/audio/bgm_combat.mpeg" type="audio/mpeg">
+</audio>
+<audio id="music-boss" loop preload="auto">
+    <source src="./assets/audio/bgm_boss.mpeg" type="audio/mpeg">
+</audio>
+<audio id="music-victory" loop preload="auto">
+    <source src="./assets/audio/bmg_victory.mpeg" type="audio/mpeg">
+</audio>
 
     <footer class="text-center text-muted py-2 flex-shrink-0">
         <small>&copy; 2026 INSTITUTO TECNOLÓGICO DE PACHUCA</small>
@@ -151,4 +160,5 @@
     <script src="./assets/js/main.js"></script>
 
 </body>
+
 </html>
