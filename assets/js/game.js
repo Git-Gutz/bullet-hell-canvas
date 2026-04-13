@@ -221,7 +221,19 @@ class Game {
         }
     }
 
-    checkDrop(enemy) {
+   checkDrop(enemy) {
+        // --- NUEVO: Lógica Exclusiva para Drones de Soporte ---
+        if (enemy.type === 'drone') {
+            const roll = Math.random();
+            // 50% Escudo, 40% MultiShot, 10% Bomba
+            if (roll < 0.50) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'shield'));
+            else if (roll < 0.90) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'multiShot'));
+            else this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'bomb'));
+            
+            return; // Detenemos la función aquí para que no use la lógica normal
+        }
+
+        // --- Lógica normal para el resto de enemigos ---
         const roll = Math.random();
         if (roll < 0.20) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'multiShot'));
         else if (roll < 0.35) this.powerUps.push(new PowerUp(this, enemy.x, enemy.y, 'shield'));
@@ -232,7 +244,15 @@ class Game {
         if (type === 'shield') this.player.hasShield = true;
         if (type === 'multiShot') { this.player.isMultiShotActive = true; this.player.multiShotTimer = 5000; }
         if (type === 'bomb') {
-            this.enemies.forEach(e => { e.hp = 0; e.markedForDeletion = true; this.addScore(e.scoreValue); });
+            // --- NUEVO: La Bomba mata a todos MENOS al Jefe ---
+            this.enemies.forEach(e => { 
+                if (!e.isBoss) { // 🛡️ CRÍTICO: Si no es el jefe, lo destruye
+                    e.hp = 0; 
+                    e.markedForDeletion = true; 
+                    this.addScore(e.scoreValue); 
+                }
+            });
+            // Limpiamos absolutamente todas las balas enemigas de la pantalla
             this.enemyBullets = [];
         }
     }

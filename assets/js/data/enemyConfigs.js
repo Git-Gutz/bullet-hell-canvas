@@ -1,4 +1,15 @@
 const EnemyConfigs = {
+    drone: {
+        width: 30, 
+        height: 30, 
+        hp: 1,           // Se destruye de un solo tiro
+        speed: 1.5, 
+        scoreValue: 500, 
+        color: '#00ffcc', // Un color cian brillante para que destaque (si no hay imagen)
+        imageKey: 'drone',// Si luego le haces un sprite, pon el nombre aquí
+        fireRate: 999999, // Un número absurdo para que JAMÁS dispare
+        patterns: ['verticalLine'] // Usamos un patrón simple para que cruce
+    },
     grunt: {
         width: 48, height: 48, 
         hp: 2, 
@@ -37,4 +48,5 @@ elite: {
         fireRate: 800,
         patterns: ['straightDive']
     }
+    
 };

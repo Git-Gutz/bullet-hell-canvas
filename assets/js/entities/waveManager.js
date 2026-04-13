@@ -1,6 +1,6 @@
 /**
  * ARCHIVO: assets/js/entities/waveManager.js
- * FASE: 12 (Coreografía de Escuadrones, Normalización y HUD Dinámico)
+ * FASE: 12 (Coreografía de Escuadrones, Normalización, HUD Dinámico y Boss System)
  */
 
 class WaveManager {
@@ -176,10 +176,12 @@ class WaveManager {
         // 1. Revisar si es el Nivel 10 (Tiene Boss)
         if (this.levelConfig.boss) {
             const b = this.levelConfig.boss;
-            // El Boss siempre sale exacto en el medio
-            const bossEnemy = new Enemy(this.game, b.type, this.game.width / 2, -150, 0, EnemyConfigs[b.type].speed);
-            bossEnemy.hp = b.hp;
-            this.game.enemies.push(bossEnemy);
+            
+            // 🔴 NUEVO: Instanciamos la clase Boss real, usando la clase que acabamos de crear en boss.js
+            const bossEntity = new Boss(this.game, this.game.width / 2, -150, b.hp);
+            
+            // Lo inyectamos en el arreglo de enemigos para que las colisiones funcionen
+            this.game.enemies.push(bossEntity);
             return;
         }
 

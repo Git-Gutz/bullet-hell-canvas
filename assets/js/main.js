@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
         grunt: './assets/images/enemies/grunt.png',
         striker: './assets/images/enemies/striker.png',
         elite: './assets/images/enemies/elite.png',
-        boss_final: './assets/images/enemies/boss_core.png' // <--- Clave para el Nivel 10
+        drone:'./assets/images/powerups/drone_support.png',
+        boss_final: './assets/images/bosses/boss_core.png' // <--- Clave para el Nivel 10
     };
 
     // 2. Elementos de UI
