@@ -2,44 +2,30 @@
    1. VARIABLES: PALETA "RANDOM PLAY" (COZY RETRO)
 ========================================= */
 :root {
-    --vhs-bg: #1c1b19;         /* Fondo oscuro, marrón/gris cálido */
-    --vcr-panel: #292724;      /* Color de plástico oscuro de equipo viejo */
-    --vcr-border: #3d3934;     /* Bisel del plástico */
-    --accent-mustard: #e5a91a; /* Amarillo cálido característico de ZZZ */
-    --accent-teal: #3b8e88;    /* Verde azulado vintage */
-    --text-main: #e2dfd8;      /* Blanco marfil, muy suave a la vista */
-    --crt-amber: #ffb800;      /* Color ámbar de pantalla terminal */
-    --crt-green: #5cdb5c;      /* Color verde fósforo apagado */
-    --button-red: #c94938;     /* Rojo ladrillo/vintage */
+    --vhs-bg: #1c1b19;         /* Fondo oscuro cálido */
+    --vcr-panel: #292724;       /* Plástico equipo viejo */
+    --vcr-border: #3d3934;      /* Bisel */
+    --accent-mustard: #e5a91a;  /* Amarillo ZZZ */
+    --accent-teal: #3b8e88;     /* Verde azulado vintage */
+    --text-main: #e2dfd8;       /* Blanco marfil */
+    --button-red: #c94938;      /* Rojo vintage */
+    --crt-green: #5cdb5c;       /* Verde fósforo */
 }
 
+/* RESET GENERAL */
 * {
     font-family: 'Press Start 2P', cursive !important;
     box-sizing: border-box;
     color: var(--text-main);
 }
 
-/* Suavizamos un poco la fuente arcade para que encaje con lo "cozy" */
-h4 { font-size: 1.5rem !important; letter-spacing: 1px; color: var(--accent-mustard); }
-h5, h6, p, span, small { font-size: 0.9rem !important; line-height: 1.8; }
-
-/* =========================================
-   2. ESTRUCTURA (BASE MÓVIL / FONDO CÁLIDO)
-========================================= */
 html, body {
     width: 100vw;
-    height: 100dvh; /* dvh: Dynamic Viewport Height (Evita bug de barra de safari/chrome) */
+    height: 100dvh;
     margin: 0;
     padding: 0;
-    overflow: hidden !important; /* Bloqueo de scroll estricto para TODO dispositivo */
+    overflow: hidden;
     background-color: var(--vhs-bg);
-    background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 0, 0, 0.1) 2px,
-        rgba(0, 0, 0, 0.1) 4px
-    );
 }
 
 body {
@@ -50,279 +36,206 @@ body {
     background-attachment: fixed;
 }
 
-/* Contenedor flexible principal */
+/* =========================================
+   2. ESTRUCTURA Y NAVEGACIÓN
+========================================= */
 .main-container {
     display: flex;
     flex-direction: column;
 }
 
-.content-wrapper {
-    height: calc(100dvh - 120px); /* Restamos el espacio exacto del Nav y Footer */
-    overflow: hidden;
-}
-/* =========================================
-   3. NAV Y FOOTER (ESTILO CAJA DE VHS)
-========================================= */
 .navbar, footer {
     background: var(--vcr-panel) !important;
     border-bottom: 4px solid var(--accent-mustard);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     z-index: 10;
 }
 
-footer {
-    border-bottom: none;
-    border-top: 4px solid var(--vcr-border);
-}
-
-.navbar-brand {
-    color: var(--accent-mustard) !important;
-    text-shadow: none; /* Quitamos el brillo neón */
-}
-.navbar-text {
-    color: var(--accent-teal) !important;
+.content-wrapper {
+    height: calc(100dvh - 110px);
+    overflow: hidden;
 }
 
 /* =========================================
-   4. TARJETA UI (PANEL ANALÓGICO ROBUSTO)
-========================================= */
-.card {
-    background: var(--vcr-panel) !important;
-    border: 4px solid var(--vcr-border) !important;
-    border-radius: 8px; /* Bordes menos curvos, más como hardware */
-    box-shadow: 
-        inset 2px 2px 0px rgba(255,255,255,0.05),
-        6px 6px 0px rgba(0,0,0,0.4); /* Sombra sólida, no difuminada */
-}
-
-.card-header {
-    background: #1e1c1a !important;
-    border-bottom: 4px solid var(--vcr-border) !important;
-}
-
-/* Caja de instrucciones estilo etiqueta de papel/cinta */
-.instructions-box {
-    background: #d8d3c5; /* Color papel viejo */
-    border: 2px solid #b8b2a1;
-    border-radius: 2px;
-    padding: 12px;
-    color: #292724 !important; /* Letra oscura sobre fondo claro */
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-}
-.instructions-box strong { color: #292724 !important; }
-
-/* Colores de Stats (Simulando display VFD de la época) */
-.text-info { color: var(--crt-green) !important; }
-.text-warning { color: var(--crt-amber) !important; }
-.text-danger { color: var(--button-red) !important; }
-.text-white { color: var(--text-main) !important; }
-
-/* Tamaño específico para los corazones de las vidas */
-#ui-lives {
-    font-size: 2rem !important; /* Hazlos más grandes que el texto normal */
-    letter-spacing: 2px; /* Un poco de separación entre cada corazón */
-    vertical-align: middle; /* Para que no se vean desalineados con la palabra "VIDAS:" */
-}
-
-/* =========================================
-   5. BOTONES (TÁCTILES Y GRUESOS)
-========================================= */
-.btn {
-    border-radius: 4px !important;
-    border: 2px solid transparent !important;
-    transition: 0.1s;
-    text-transform: uppercase;
-    font-weight: bold;
-    /* Efecto de botón físico sin presionar */
-    transform: translateY(0);
-}
-
-.btn:active {
-    /* Efecto al presionar (se hunde) */
-    transform: translateY(4px);
-    box-shadow: none !important;
-}
-
-/* Botón Iniciar (Mostaza ZZZ) */
-.btn-arcade-success { 
-    background: var(--accent-mustard); 
-    color: #1a1a1a; 
-    box-shadow: 0 6px 0 #9c730e; 
-}
-.btn-arcade-success:hover { background: #f0b72e; color: #000; }
-
-/* Botón Pausa (Teal) */
-.btn-arcade-warning { 
-    background: var(--accent-teal); 
-    color: #fff; 
-    box-shadow: 0 6px 0 #21615d; 
-}
-.btn-arcade-warning:hover:not(:disabled) { background: #4bc0b9; color: #000; }
-.btn-arcade-warning:disabled { background: #3d3934; box-shadow: 0 6px 0 #1c1b19; color: #555; }
-
-/* Botón Reiniciar (Rojo Vintage) */
-.btn-arcade-danger { 
-    background: var(--button-red); 
-    color: #fff; 
-    box-shadow: 0 6px 0 #7a2a1f; 
-}
-.btn-arcade-danger:hover { background: #e35a4b; color: #fff; }
-
-/* =========================================
-   6. CONTENEDOR CANVAS (TV DE TUBO VIEJA)
+   3. VENTANA ARCADE (TV CRT)
 ========================================= */
 .arcade-window {
     position: relative;
-    width: 100%; /* Adaptable en móvil */
-    max-width: 1200px; /* Tu tamaño personalizado */
-    aspect-ratio: 1200 / 900; /* Mantiene tu proporción exacta (4:3) */
-    height: auto;
-    max-height: 100%;
-    /* Bisel del televisor */
-    background: #111;
+    width: 100%;
+    max-width: 900px;
+    aspect-ratio: 900 / 600;
+    background: #000;
     border: 12px solid #222;
     border-radius: 16px;
     overflow: hidden;
-    
-    box-shadow: inset 10px 10px 20px 5px #000000;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
 #gameCanvas {
     width: 100%;
     height: 100%;
-    background: #0f1210; /* Un gris/verde muy oscuro */
     display: block;
+    background: #0f1210;
 }
 
-/* Efecto de cristal de TV (CRT) más cálido */
 .crt-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     pointer-events: none;
-    /* Líneas de escaneo más suaves y en tonos ámbar/sepia muy sutiles */
-    background: linear-gradient(
-        rgba(18, 16, 16, 0) 50%, 
-        rgba(0, 0, 0, 0.15) 50%), 
-        linear-gradient(90deg, rgba(255, 150, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-    background-size: 100% 4px, 3px 100%;
-    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8); /* Viñeteo fuerte en las esquinas */
-}
-
-/* Reflejo ligero en la pantalla */
-.arcade-window::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 40%);
-    pointer-events: none;
+    z-index: 5; /* Filtro por debajo de los menús */
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.5);
 }
 
 /* =========================================
-   7. MEDIA QUERIES Y OPTIMIZACIÓN MÓVIL
+   4. MENÚS Y OVERLAYS (ESTADO SÓLIDO)
 ========================================= */
-
-/* COMPORTAMIENTO MÓVIL (Por defecto < 992px) */
-.game-column {
-    height: auto;
-    flex: 0 0 auto;
+.game-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    /* ❗ FONDO SÓLIDO: No deja ver el juego */
+    background-color: #0f1210 !important; 
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
+    /* ❗ PRIORIDAD TOTAL: Encima de CRT y Canvas */
+    z-index: 10000 !important; 
+    opacity: 1 !important;
+    transition: opacity 0.5s ease;
 }
 
-.info-column {
-    flex: 1 1 auto;
-    min-height: 0; 
+.hidden {
+    display: none !important;
+    pointer-events: none;
+    visibility: hidden;
 }
 
-@media (max-width: 991px) {
-    /* 1. Restringir el tamaño del juego para proteger los botones */
-    .arcade-window {
-        max-height: 45dvh; /* El juego NUNCA ocupará más del 45% de la pantalla en vertical */
-        width: auto; /* Se encoge a los lados automáticamente si es necesario */
-        margin: 0 auto; /* Lo mantiene centrado */
-    }
-
-    /* 2. Comprimir la cabecera de la tarjeta */
-    .card-header {
-        padding: 0.3rem !important; 
-    }
-    .card-header h4 {
-        font-size: 1rem !important; 
-    }
-
-    /* 3. Comprimir el cuerpo y los textos */
-    .card-body {
-        padding: 0.4rem; 
-    }
-    
-    .instructions-box {
-        display: none !important; /* Oculto en móvil */
-    }
-
-    .hud-stats {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.2rem !important; /* Casi sin margen abajo */
-    }
-
-    .hud-stats h5, .hud-stats h6 { margin-bottom: 2px; width: 48%; font-size: 0.65rem !important; }
-    .hud-stats p { margin-bottom: 0; width: 30%; font-size: 0.6rem !important; text-align: center; }
-    .hud-stats hr { display: none; } 
-    
-    #ui-lives { font-size: 1.2rem !important; } 
-
-    /* 4. Comprimir los botones al máximo */
-    .d-grid { 
-        gap: 0.25rem !important; /* Reduce el espacio entre los 3 botones */
-    }
-    .btn-lg { 
-        padding: 0.35rem; 
-        font-size: 0.7rem !important; 
-    }
+/* Título con Efecto Glitch */
+.title-hellframe {
+    font-size: 4rem;
+    color: var(--button-red);
+    text-shadow: 4px 4px 0px var(--accent-teal);
+    letter-spacing: 12px;
+    margin-bottom: 40px;
+    animation: glitch 1.5s infinite;
 }
 
-/* COMPORTAMIENTO ESCRITORIO (PC >= 992px) */
-@media (min-width: 992px) {
-    html, body {
-        height: 100vh;
-        overflow: hidden !important; 
-    }
-    .content-wrapper {
-        height: calc(100vh - 120px); 
-        overflow: hidden;
-    }
-    .game-column, .info-column {
-        height: 100%; 
-    }
-    .level-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin-top: 15px;
+@keyframes glitch {
+    0% { transform: skew(0deg); }
+    20% { transform: skew(-3deg); color: var(--button-red); }
+    21% { transform: skew(10deg); color: var(--accent-teal); }
+    25% { transform: skew(0deg); }
+    100% { transform: skew(0deg); }
 }
 
-.btn-level-select {
-    background: #0f1210;
-    color: #3b8e88;
-    border: 1px solid #3b8e88;
-    padding: 10px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 10px;
+/* Estilos de Victoria/Derrota */
+.text-win {
+    font-size: 3.5rem;
+    color: var(--crt-green) !important;
+    text-shadow: 0 0 20px rgba(92, 219, 92, 0.6), 4px 4px 0px #1a3a1a;
+    letter-spacing: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.text-lose {
+    font-size: 3.5rem;
+    color: var(--button-red) !important;
+    text-shadow: 0 0 20px rgba(201, 73, 56, 0.6);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.btn-menu {
+    background: var(--accent-teal);
+    color: #fff;
+    border: none;
+    padding: 20px 40px;
+    font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s;
+    box-shadow: 0 6px 0 #21615d;
+    margin: 10px;
+    transition: 0.1s;
 }
 
-.btn-level-select:hover {
-    background: #3b8e88;
-    color: #0f1210;
-    box-shadow: 0 0 10px #3b8e88;
+.btn-menu:active { transform: translateY(4px); box-shadow: none; }
+
+/* =========================================
+   5. PANEL LATERAL (HUD)
+========================================= */
+.card {
+    background: var(--vcr-panel) !important;
+    border: 4px solid var(--vcr-border) !important;
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.4);
 }
+
+#ui-lives {
+    color: var(--button-red);
+    font-size: 1.8rem !important;
+    letter-spacing: 5px;
+}
+
+.stat-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.2);
+    padding: 8px;
+    margin-bottom: 5px;
+}
+
+.instructions-box {
+    background: #d8d3c5;
+    color: #292724 !important;
+    padding: 12px;
+    font-size: 0.7rem !important;
+    border-left: 6px solid var(--accent-mustard);
+}
+
+.instructions-box strong { color: #292724 !important; }
+
+/* =========================================
+   6. BOTONES ARCADE (SIDEBAR)
+========================================= */
+.d-grid .btn {
+    margin-bottom: 10px;
+    padding: 15px !important;
+    font-size: 0.85rem !important;
+    width: 100%;
+    border-radius: 4px !important;
+}
+
+.btn-arcade-warning { background: var(--accent-teal); border: none; box-shadow: 0 6px 0 #21615d; }
+.btn-arcade-danger { background: var(--button-red); border: none; box-shadow: 0 6px 0 #7a2a1f; }
+
+/* BOTÓN VOLVER AL MENÚ (SIDEBAR) */
+#btn-to-menu {
+    background: #4a453f; /* Plástico neutro */
+    color: var(--text-main);
+    border: none;
+    box-shadow: 0 6px 0 #292724;
+    transition: 0.1s;
+}
+
+#btn-to-menu:hover { background: #5a544b; color: var(--accent-mustard); }
+#btn-to-menu:active { transform: translateY(4px); box-shadow: none; }
+
+/* SELECTOR DE NIVELES */
+.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.btn-level-select {
+    background: #0f1210; border: 1px solid var(--accent-teal);
+    color: var(--accent-teal); font-size: 0.6rem; padding: 10px 0; cursor: pointer;
+}
+
+/* =========================================
+   7. RESPONSIVE MÓVIL
+========================================= */
+@media (max-width: 991px) {
+    .arcade-window { max-height: 40dvh; }
+    .title-hellframe { font-size: 2.2rem; }
+    .text-win, .text-lose { font-size: 2rem; }
+    #ui-lives { font-size: 1.2rem !important; }
 }

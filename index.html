@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automata Hell - Proyecto Graficación 2D</title>
+    <title>HELLFRAME - Proyecto Graficación 2D</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -16,9 +16,9 @@
 
     <nav class="navbar navbar-dark shadow flex-shrink-0">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">PROYECTO: GRAFICACIÓN 2D</span>
+            <span class="navbar-brand mb-0 h1">TERMINAL: HELLFRAME v1.0</span>
             <span class="navbar-text text-white small">
-                Leonardo Gutiérrez | Ing. En Sistemas Computacionales
+                Leonardo Gutiérrez | I.T. Pachuca
             </span>
         </div>
     </nav>
@@ -30,6 +30,37 @@
                 <div class="arcade-window">
                     <canvas id="gameCanvas" width="900" height="600"></canvas>
                     <div class="crt-overlay"></div>
+
+                    <div id="screen-start" class="game-overlay">
+                        <div class="title-container">
+                            <h1 class="title-hellframe">HELLFRAME</h1>
+                        </div>
+                        <div class="menu-options">
+                            <button id="btn-start-game" class="btn-menu">INICIAR SECUENCIA</button>
+                            <button id="btn-toggle-audio" class="btn-menu btn-secondary">
+                                AUDIO: <span id="audio-status">ON</span>
+                            </button>
+                        </div>
+                        <p class="credits">SISTEMA LISTO PARA EJECUCIÓN</p>
+                    </div>
+
+                   <div id="screen-victory" class="game-overlay hidden">
+    <div class="title-container">
+        <h1 class="text-win">SISTEMA PURGADO</h1>
+    </div>
+    <div class="victory-details">
+        <p class="mb-2">NÚCLEO AUTÓMATA NEUTRALIZADO</p>
+        <p>PUNTAJE TOTAL: <span id="final-score-win" class="text-info">000000</span></p>
+    </div>
+    <p class="mt-5 small text-muted">USE LA TERMINAL LATERAL PARA REGRESAR</p>
+</div>
+
+                    <div id="screen-game-over" class="game-overlay hidden">
+                        <h1 class="text-lose">SISTEMA COLAPSADO</h1>
+                        <p>DAÑO ESTRUCTURAL CRÍTICO</p>
+                        <p>SCORE: <span id="final-score-lost">000000</span></p>
+                        <button onclick="location.reload()" class="btn-menu">REPARAR NAVE</button>
+                    </div>
                 </div>
             </div>
 
@@ -42,32 +73,39 @@
 
                         <div class="hud-stats mb-3">
                             <h5 class="text-info">SCORE: <span id="ui-score" class="text-white">000000</span></h5>
-                            <h6 class="text-warning">HIGH SCORE: <span id="ui-highscore"
-                                    class="text-white">000000</span></h6>
+                            <h6 class="text-warning">HIGH SCORE: <span id="ui-highscore" class="text-white">000000</span></h6>
+                            
                             <hr class="border-secondary my-3">
+                            
+                            <div class="stat-box mb-2">
+                                <span class="text-danger">VIDAS:</span>
+                                <span id="ui-lives" class="stat-value">♥♥♥</span>
+                            </div>
+
                             <div class="stat-box">
-                                <span>NIVEL:</span>
+                                <span>FASE:</span>
                                 <span id="ui-level" class="stat-value">01</span>
+                            </div>
+                            <div class="stat-box">
+                                <span>ORDEN:</span>
+                                <span id="ui-wave" class="stat-value">01</span>
+                            </div>
                         </div>
-                        <div class="stat-box">
-                            <span>HORDA:</span>
-                            <span id="ui-wave" class="stat-value">01</span>
+
+                        <div class="instructions-box mb-3">
+                            <strong>PROTOCOLOS:</strong><br>
+                            - MOUSE: NAVEGACIÓN<br>
+                            - SPACE: LÁSER DE PULSO
                         </div>
-                    </div>
 
-                    <div class="instructions-box mb-4">
-                        <strong>SISTEMA DE CONTROL:</strong><br>
-                        - MOUSE: GUIAR NAVE<br>
-                        - SPACE: LÁSER ENERGÍA
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button id="btn-start" class="btn btn-arcade-success btn-lg">INICIAR_SISTEMA</button>
-                        <button id="btn-pause" class="btn btn-arcade-warning" disabled>PAUSA</button>
-                        <button id="btn-restart" class="btn btn-arcade-danger">REINICIAR</button>
-                        <div id="level-selection-panel" class="arcade-panel">
-                            <h3 class="panel-title">SELECCIÓN_DE_FASE</h3>
-                            <div id="level-buttons-container" class="level-grid">
+                        <div class="d-grid gap-2">
+                            <button id="btn-pause" class="btn btn-arcade-warning" disabled>PAUSA</button>
+                            <button id="btn-restart" class="btn btn-arcade-danger">REINICIAR</button>
+                            <button id="btn-to-menu" class="btn btn-secondary">VOLVER AL MENÚ</button>
+                            
+                            <div id="level-selection-panel" class="arcade-panel mt-2">
+                                <h3 class="panel-title" style="font-size: 10px;">SALTO_DE_DATOS</h3>
+                                <div id="level-buttons-container" class="level-grid"></div>
                             </div>
                         </div>
                     </div>
@@ -75,7 +113,10 @@
             </div>
         </div>
     </div>
-    </div>
+
+    <audio id="bg-music" loop>
+        <source src="./assets/audio/ost_main.mp3" type="audio/mpeg">
+    </audio>
 
     <footer class="text-center text-muted py-2 flex-shrink-0">
         <small>&copy; 2026 INSTITUTO TECNOLÓGICO DE PACHUCA</small>
@@ -83,32 +124,31 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Esto garantiza que el objeto exista siempre, aunque esté vacío al principio.
+        // Inicialización de objeto global de Assets
         window.Assets = {
             images: {},
             isLoaded: false
         };
     </script>
+
     <script src="./assets/js/patterns/movementPatterns.js"></script>
     <script src="./assets/js/data/enemyConfigs.js"></script>
     <script src="./assets/js/data/powerUpConfigs.js"></script>
     <script src="./assets/js/data/waveConfigs.js"></script>
     <script src="./assets/js/data/levelConfigs.js"></script>
 
-
     <script src="./assets/js/entities/powerUp.js"></script>
     <script src="./assets/js/entities/enemy.js"></script>
-    <script src="assets/js/entities/boss.js"></script> 
+    <script src="./assets/js/entities/boss.js"></script> 
     <script src="./assets/js/entities/enemyBullet.js"></script>
     <script src="./assets/js/entities/bullet.js"></script>
     <script src="./assets/js/entities/player.js"></script>
     <script src="./assets/js/entities/waveManager.js"></script>
 
-
     <script src="./assets/js/utils.js"></script>
     <script src="./assets/js/input.js"></script>
     <script src="./assets/js/game.js"></script>
     <script src="./assets/js/main.js"></script>
-</body>
 
+</body>
 </html>
