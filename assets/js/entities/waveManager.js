@@ -1,6 +1,6 @@
 /**
  * ARCHIVO: assets/js/entities/waveManager.js
- * FASE: 14 (Sincronización de Audio y Corrección de Punteros Nulos)
+ * FASE: 18 (Mecánica de Restauración de Integridad)
  * PROYECTO: HELLFRAME - I.T. Pachuca
  */
 
@@ -10,10 +10,8 @@ class WaveManager {
         this.levelIndex = 0;
         this.waveIndex = 0;
         
-        // --- 🚩 CORRECCIÓN: Definimos currentWave como propiedad de clase ---
         this.currentWave = null; 
         
-        // Estados: 'TRANSITION', 'WAVE', 'COMPLETED'
         this.state = 'TRANSITION'; 
         this.timer = 0;
         this.message = '';
@@ -28,15 +26,22 @@ class WaveManager {
         return LevelConfigs[this.levelIndex];
     }
 
+    /**
+     * Inicializa un nivel y restablece los parámetros de combate.
+     */
     startLevel() {
         this.message = this.levelConfig.name;
         this.state = 'TRANSITION';
         this.timer = 0;
         this.waveIndex = 0;
-        this.currentWave = null; // Reset de horda
+        this.currentWave = null;
         this.eliteSpawned = false;
         this.game.enemies = []; 
         
+        // 🚩 MECÁNICA: Restablecer vidas al iniciar/pasar nivel
+        this.game.lives = 3; 
+        
+        // Sincronizamos la interfaz para mostrar los corazones restaurados
         this.game.updateUI();
     }
 
@@ -49,26 +54,21 @@ class WaveManager {
 
     prepareWave() {
         this.pendingSpawns = [];
-        
-        // --- 🚩 CORRECCIÓN: Guardamos la horda en el contexto global de la clase ---
         const waveKey = this.levelConfig.waves[this.waveIndex];
         this.currentWave = WaveConfigs[waveKey]; 
         
         if (!this.currentWave) {
-            console.error(`[ERROR] No se encontró la configuración para la horda: ${waveKey}`);
+            console.error(`[ERROR] Configuración de horda no encontrada: ${waveKey}`);
             return;
         }
 
-        // 1. RECOLECTAR ENEMIGOS
         this.currentWave.enemies.forEach(e => {
             for (let i = 0; i < e.count; i++) {
                 this.pendingSpawns.push(e.type);
             }
         });
 
-        // 2. BARAJAR (Shuffle)
         this.pendingSpawns.sort(() => Math.random() - 0.5);
-
         this.spawnTimer = 0;
         this.currentInterval = this.currentWave.interval * 3.5; 
     }
@@ -86,7 +86,6 @@ class WaveManager {
         if (this.state === 'WAVE') {
             this.spawnTimer += deltaTime;
 
-            // 1. LANZAR ESCUADRÓN SI HAY PENDIENTES
             if (this.pendingSpawns.length > 0) {
                 if (this.spawnTimer > this.currentInterval) {
                     const squadSize = Math.min(Math.floor(Math.random() * 3) + 3, this.pendingSpawns.length);
@@ -95,13 +94,11 @@ class WaveManager {
                     this.spawnFormation(squad);
                     this.spawnTimer = 0;
                     
-                    // Ajuste de intervalo aleatorio
                     if (this.currentWave) {
                         this.currentInterval = (this.currentWave.interval * 3) + (Math.random() * 1000);
                     }
                 }
             } 
-            // 2. SI LA OLEADA SE ACABÓ Y LA PANTALLA ESTÁ LIMPIA
             else if (this.game.enemies.length === 0) {
                 this.waveIndex++;
                 this.game.updateUI();
@@ -115,12 +112,10 @@ class WaveManager {
                 else {
                     this.levelIndex++;
                     if (this.levelIndex < LevelConfigs.length) {
+                        // Al llamar a startLevel(), las vidas vuelven a 3 automáticamente
                         this.startLevel();
                     } else {
-                        // 🚩 NUEVO: Disparamos la música de victoria al terminar todos los niveles
                         if (window.switchMusic) window.switchMusic('victory'); 
-
-                        // Disparamos la pantalla de victoria del motor
                         this.game.gameOver(true);
                         this.state = 'COMPLETED';
                     }
@@ -168,22 +163,16 @@ class WaveManager {
     spawnElitesAndBoss() {
         this.eliteSpawned = true;
 
-        // --- 🚩 CORRECCIÓN: Lógica de Jefe con Escudo de Punteros ---
         if (this.levelConfig.boss) {
             const b = this.levelConfig.boss;
-            
-            // Verificamos que this.currentWave exista antes de leer .isBossWave
             if (this.currentWave && this.currentWave.isBossWave) {
-                console.log(" [SISTEMA] Firma de energía masiva detectada. Cambiando BGM.");
                 if (window.switchMusic) window.switchMusic('boss');
             }
-            
             const bossEntity = new Boss(this.game, this.game.width / 2, -150, b.hp);
             this.game.enemies.push(bossEntity);
             return;
         }
 
-        // 2. Lógica de Élites Normales
         const config = this.levelConfig.eliteWave;
         if (!config) return;
 
